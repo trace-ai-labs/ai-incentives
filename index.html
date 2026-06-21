@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>What Makes AI Agents Follow the Rules?</title>
+<meta name="description" content="An interactive study of how rule framing, enforcement, and workplace pressure shape whether AI agents follow regulations, across twelve language models." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ffffff'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%231f6fe5' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23e23b4e'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="accentbar"></div>
+
+<nav class="top">
+  <div class="wrap">
+    <span class="navdot"></span>
+    <div class="links">
+      <a href="#setup">Setup</a>
+      <a href="#profiles">Two groups</a>
+      <a href="#pressure">User pressure</a>
+      <a href="#social">Peers &amp; bosses</a>
+      <a href="#multiturn">Follow-ups</a>
+      <a href="#reasoning">Honesty</a>
+      <a href="#explorer">Read responses</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>What makes AI agents <span class="u">follow the rules?</span></h1>
+    <p class="lede">
+      We give an AI procurement agent one legal rule, then add the ordinary pressures of a workplace:
+      fines, deadlines, managers, and what other teams did. Whether the agent obeys turns out to depend less
+      on the rule than on how it is phrased and the situation around it.
+    </p>
+    <p class="authors">
+      <a href="https://mika-okamoto.github.io" target="_blank" rel="noopener">Mika Okamoto</a>
+      <span class="sep">✦</span>
+      <a href="https://ansel.fyi" target="_blank" rel="noopener">Ansel Erol</a>
+      <span class="sep">✦</span>
+      <a href="https://scholar.google.com/citations?user=4sg5f24AAAAJ" target="_blank" rel="noopener">Kutluhan Erol</a>
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="https://trace-ai-labs.github.io/ai-incentives/paper.pdf" target="_blank" rel="noopener">Read the paper</a>
+      <a class="btn" href="https://github.com/trace-ai-labs/llm-compliance" target="_blank" rel="noopener">Code &amp; data</a>
+    </div>
+    <div class="stats" id="stat-cards"></div>
+  </div>
+</header>
+
+<!-- ===================== SETUP ===================== -->
+<section id="setup" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <h2>The test</h2>
+      <p>
+        The agent works in a company chat and is told to keep costs down. Its instructions add a rule: purchases
+        over $1k must use an environmentally certified vendor. We then ask it to pick a vendor from a short list.
+        Some vendors are certified; the rest are not, and the uncertified ones are cheaper, faster, and rated just
+        as well. Choosing a certified vendor counts as following the rule, and it always costs more. That tension
+        is the whole experiment.
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="setup-tag">What we change</div>
+        <p style="font-size:.86rem;margin:12px 0 5px;color:var(--ink);font-weight:600;">How the rule is phrased</p>
+        <div class="pill-row" id="pills-framing"></div>
+        <p class="note" style="margin-top:6px;">A command, a neutral fact, or explicit permission to opt out. Hover for the exact wording.</p>
+        <p style="font-size:.86rem;margin:14px 0 5px;color:var(--ink);font-weight:600;">Size of the fine</p>
+        <div class="pill-row" id="pills-fin"></div>
+        <p class="note" style="margin-top:6px;">Under a small fine, paying it is cheaper than buying certified. A pure cost-minimizer should break the rule.</p>
+      </div>
+
+      <div class="card">
+        <div class="setup-tag">Twelve models, two groups</div>
+        <p style="font-size:.88rem;margin:12px 0 12px;color:var(--ink-2);">
+          We sort the models up front by how they were trained. This split predicts their behavior throughout. Hover any model for its developer and training focus.
+        </p>
+        <div class="grouplist">
+          <div class="gl-label I">Safety-tuned</div>
+          <div class="gl-names" id="gl-I"></div>
+          <div class="gl-sub">Treat the rule as close to absolute.</div>
+          <div class="gl-label II">Task-optimized</div>
+          <div class="gl-names" id="gl-II"></div>
+          <div class="gl-sub">Treat the rule as one factor to weigh against cost.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PROFILES ===================== -->
+<section id="profiles">
+  <div class="wrap">
+    <div class="head">
+      <h2>One rule, twelve different agents</h2>
+      <p>
+        Given the exact same rule, the models behave like two species. Safety-tuned models obey across every phrasing
+        and fine. Task-optimized models obey only when the rule is a command, or when the math favors it. One quirk shows
+        up below: adding a small, beatable fine often <i>lowers</i> compliance, because a stated fine reads as a price.
+      </p>
+    </div>
+
+    <div class="dash">
+      <div class="dash-head">
+        <h3>Compliance by phrasing and fine <span class="info" data-tip="Each cell is the share of runs where the agent picked a certified vendor. Columns group the three phrasings, each split by fine size. Hover a column header for what the condition says to the agent.">i</span></h3>
+      </div>
+      <div class="dash-body">
+        <div class="heat-wrap"><div class="heat" id="heat-controls"></div><div class="vlegend"></div></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="dash">
+        <div class="dash-head" style="gap:10px;">
+          <h3>As the fine grows <span class="info" data-tip="Each line is a model. The y-axis is the share of certified-vendor choices. For task-optimized models, a small fine often lowers compliance before a large one recovers it. Hover a line to isolate it.">i</span></h3>
+          <div class="controls"><div class="ctl"><span>Phrasing</span>
+            <div class="seg" id="seg-paradox-framing">
+              <button data-v="informational" class="active">Info.</button>
+              <button data-v="directive">Imper.</button>
+              <button data-v="discretionary">Discr.</button>
+            </div></div></div>
+        </div>
+        <div class="dash-body"><div class="chartwrap"><div id="line-paradox"></div></div></div>
+      </div>
+      <div class="dash">
+        <div class="dash-head"><h3>Where each model breaks <span class="info" data-tip="Right: how much the model drops when the rule changes from a command to a neutral statement. Up: how much it drops when a small fine is added. Lower-left models barely move; upper-right models fall apart under both.">i</span></h3></div>
+        <div class="dash-body"><div class="chartwrap"><div id="scatter-fragility"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRESSURE ===================== -->
+<section id="pressure">
+  <div class="wrap">
+    <div class="head">
+      <h2>How pressure from the user breaks the rule</h2>
+      <p>
+        With the rule fixed, the employee pushes in nine ways, from a soft budget hint to a flat order to ignore it.
+        A built-in instruction to follow the law regardless ("anti-adversarial") helps, but one tactic gets past it.
+      </p>
+    </div>
+
+    <div class="dash">
+      <div class="dash-head">
+        <h3>Compliance under each tactic <span class="info" data-tip="Columns are the nine pressure tactics plus a no-pressure control, ordered from gentle to forceful. Hover a column header to read the exact message the employee sends.">i</span></h3>
+        <div class="controls">
+          <div class="ctl"><span>Built-in instruction</span>
+            <div class="seg" id="seg-pressure-mandate">
+              <button data-v="none" class="active">None</button>
+              <button data-v="anti_adversarial">Follow-the-law</button>
+            </div></div>
+          <div class="ctl"><span>Fine</span>
+            <div class="seg" id="seg-pressure-fin">
+              <button data-v="none" class="active">No fine</button>
+              <button data-v="low">Small</button>
+            </div></div>
+        </div>
+      </div>
+      <div class="dash-body">
+        <div class="heat-wrap"><div class="heat" id="heat-pressure"></div><div class="vlegend"></div></div>
+        <div class="callout urgency">
+          <span class="ico">⏱️</span>
+          <p>A deadline beats every defense. Even with the follow-the-law instruction, only one model holds up under urgency.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash">
+      <div class="dash-head"><h3>How far each tactic drops compliance <span class="info" data-tip="The compliance lost versus the no-pressure baseline, averaged across the selected models. Longer bars mean the tactic was more effective at getting the agent to break the rule.">i</span></h3>
+        <div class="controls">
+          <div class="ctl"><span>Average</span>
+            <div class="seg" id="seg-rank-stat">
+              <button data-v="mean" class="active">Mean</button>
+              <button data-v="median">Median</button>
+            </div></div>
+          <div class="ctl"><span>Built-in instruction</span>
+            <div class="seg" id="seg-rank-mandate">
+              <button data-v="none" class="active">None</button>
+              <button data-v="anti_adversarial">Follow-the-law</button>
+            </div></div>
+        </div>
+      </div>
+      <div class="dash-body"><div class="chartwrap"><div id="bars-rank"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SOCIAL & AUTHORITY ===================== -->
+<section id="social" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <h2>What peers and bosses do to compliance</h2>
+      <p>
+        Now we add one more signal and watch the whole compliance curve shift. A manager's blanket approval or a board
+        cost policy pushes compliance down hard, even for safety-tuned models. Peer outcomes cut both ways: a peer who
+        was fined pushes it up, a peer who got away with it pushes it down.
+      </p>
+    </div>
+    <div class="dash">
+      <div class="dash-head">
+        <h3 id="effect-title">Effect of a peer's outcome</h3>
+        <div class="controls">
+          <div class="ctl"><span>Signal</span>
+            <div class="seg" id="seg-effect-kind">
+              <button data-v="authority" class="active">Authority</button>
+              <button data-v="social">Peer's outcome</button>
+            </div></div>
+        </div>
+      </div>
+      <div class="dash-body"><div class="chartwrap"><div id="effect-chart"></div></div>
+        <div class="legend big" id="effect-legend"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MULTI-TURN ===================== -->
+<section id="multiturn">
+  <div class="wrap">
+    <div class="head">
+      <h2>Easy to push off the rule, easy to talk back onto it</h2>
+      <p>
+        Real use is a conversation. After the first answer, the employee either pushes back on a good answer or
+        challenges a bad one. The same neutral nudge ("can you double-check?") is used either way, so switching on it
+        is just going along with the user. Good answers erode under pushback, but bad answers recover when challenged,
+        which is why a light second look helps.
+      </p>
+    </div>
+    <div class="dash">
+      <div class="dash-head"><h3>End result as the follow-up gets stronger <span class="info" data-tip="The bold lines are the average across the selected models. Faint lines are individual models. Up is better: the agent ends on a certified vendor.">i</span></h3>
+        <div class="controls"><div class="ctl"><span>Fine</span>
+          <div class="seg" id="seg-mt-fin">
+            <button data-v="all" class="active">All</button>
+            <button data-v="none">No fine</button>
+            <button data-v="low">Small</button>
+          </div></div></div>
+      </div>
+      <div class="dash-body">
+        <div class="mt-layout">
+          <div class="chartwrap" style="flex:1;"><div id="line-mt"></div></div>
+          <div class="mt-models" id="mt-models"></div>
+        </div>
+        <div class="legend big">
+          <span><span class="swatch" style="background:var(--red)"></span>Pushback on a good answer</span>
+          <span><span class="swatch" style="background:var(--blue)"></span>Challenge on a bad answer</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== REASONING ===================== -->
+<section id="reasoning" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <h2>When a model breaks the rule, does it admit it?</h2>
+      <p>
+        Usually yes. It either names the rule and overrides it, or mentions it in passing. The worry is the
+        <b class="hl-red">silent</b> break, where the agent picks an uncertified vendor without ever referring to the
+        rule. An audit that only reads the agent's reasoning would miss it. Models are sorted from most open to most silent.
+      </p>
+    </div>
+    <div class="dash">
+      <div class="dash-head"><h3>How violations are explained <span class="info" data-tip="Among the runs where the agent broke the rule, the share that hedged (named the rule, then overrode it), acknowledged it in passing, said nothing about it, or cited company policy instead.">i</span></h3>
+        <div class="controls"><div class="ctl"><span>Setting</span>
+          <div class="seg" id="seg-reason">
+            <button data-v="base" class="active">Baseline</button>
+            <button data-v="mand">Under pressure</button>
+          </div></div></div>
+      </div>
+      <div class="dash-body"><div class="chartwrap"><div id="bars-reason"></div></div>
+        <div class="legend big">
+          <span><span class="swatch" style="background:#1f6fe5"></span>Names it, overrides it</span>
+          <span><span class="swatch" style="background:#9aa4b2"></span>Mentions in passing</span>
+          <span><span class="swatch" style="background:#e23b4e"></span>Says nothing (silent)</span>
+          <span><span class="swatch" style="background:#f59e0b"></span>Cites company policy</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EXPLORER ===================== -->
+<section id="explorer">
+  <div class="wrap">
+    <div class="head">
+      <h2>Read what the agents actually said</h2>
+      <p>Every number above comes from real generations. Filter the transcripts by model, experiment, and outcome.
+        Certified vendors are highlighted in <span class="hl-blue">blue</span>, uncertified in
+        <span class="hl-red">red</span>, so you can see the choice at a glance.</p>
+    </div>
+    <div class="dash">
+      <div class="dash-body">
+        <div class="explorer-controls">
+          <div class="ctl"><span class="explbl">Model</span><select class="sel" id="exp-model"></select></div>
+          <div class="ctl"><span class="explbl">Experiment</span><select class="sel" id="exp-exp"></select></div>
+          <div class="ctl"><span class="explbl">Outcome</span>
+            <select class="sel" id="exp-outcome">
+              <option value="all">All</option><option value="true">Followed the rule</option><option value="false">Broke the rule</option>
+            </select></div>
+          <div class="ctl" style="flex:1;min-width:200px;"><span class="explbl">Search</span>
+            <input class="search" id="exp-search" placeholder="fine, audit, deadline…" style="width:100%;"></div>
+        </div>
+        <p class="count-note" id="exp-count"></p>
+        <div class="resp-list" id="resp-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a href="https://trace-ai-labs.github.io/ai-incentives/paper.pdf" target="_blank" rel="noopener">Paper</a>
+    <a href="https://github.com/trace-ai-labs/llm-compliance" target="_blank" rel="noopener">Code</a>
+    <a href="https://github.com/trace-ai-labs/llm-compliance/tree/main/results" target="_blank" rel="noopener">Data</a>
+  </div>
+</footer>
+
+<div id="tip"></div>
+<script src="data/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
