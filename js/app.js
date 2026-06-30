@@ -158,7 +158,11 @@ function hideTip(){ tip.style.opacity=0; }
 function bindTip(node, fn){
   node.addEventListener("mousemove",e=>showTip(fn(),e));
   node.addEventListener("mouseleave",hideTip);
+  // touch: tap to reveal, tap elsewhere to dismiss (see document handler below)
+  node.addEventListener("touchstart",e=>{ e.stopPropagation(); showTip(fn(), e.touches[0]); }, {passive:true});
 }
+// dismiss any open tooltip when tapping empty space on touch devices
+document.addEventListener("touchstart", hideTip, {passive:true});
 function condTip(label, desc){
   if(!desc) return `<div class="t-title">${label}</div>`;
   return `<div class="t-title">${label}</div><div class="t-desc">${desc.d||""}</div>`
