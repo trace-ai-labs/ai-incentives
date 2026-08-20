@@ -20,12 +20,13 @@
     <span class="navdot"></span>
     <div class="links">
       <a href="#setup">Setup</a>
-      <a href="#profiles">Two groups</a>
+      <a href="#profiles">Where models differ</a>
       <a href="#pressure">User pressure</a>
       <a href="#social">Peers &amp; bosses</a>
       <a href="#multiturn">Follow-ups</a>
       <a href="#reasoning">Honesty</a>
       <a href="#explorer">Read responses</a>
+      <a href="#cite">Cite</a>
     </div>
   </div>
 </nav>
@@ -44,6 +45,11 @@
       <a href="https://ansel.fyi" target="_blank" rel="noopener">Ansel Erol</a>
       <span class="sep">✦</span>
       <a href="https://scholar.google.com/citations?user=4sg5f24AAAAJ" target="_blank" rel="noopener">Kutluhan Erol</a>
+    </p>
+    <p class="venue">
+      Published at the 2026 AAAI/ACM Conference on AI, Ethics, and Society
+      <span class="sep">&#10022;</span>
+      2026 Conference on Language Modeling Workshop on Agent Behavior
     </p>
     <div class="cta">
       <a class="btn primary" href="https://trace-ai-labs.github.io/ai-incentives/paper.pdf" target="_blank" rel="noopener">Read the paper</a>
@@ -79,17 +85,18 @@
       </div>
 
       <div class="card">
-        <div class="setup-tag">Twelve models, two groups</div>
+        <div class="setup-tag">Twelve models, one rule</div>
         <p style="font-size:.88rem;margin:12px 0 12px;color:var(--ink-2);">
-          We sort the models up front by how they were trained. This split predicts their behavior throughout. Hover any model for its developer and training focus.
+          We ran the same experiments on all twelve. We also checked whether how a model was trained predicts
+          how it behaves here &mdash; it does not, so there is no shortcut for measuring it. Hover any model for
+          its developer and stated training focus.
         </p>
         <div class="grouplist">
-          <div class="gl-label I">Safety-tuned</div>
-          <div class="gl-names" id="gl-I"></div>
-          <div class="gl-sub">Treat the rule as close to absolute.</div>
-          <div class="gl-label II">Task-optimized</div>
-          <div class="gl-names" id="gl-II"></div>
-          <div class="gl-sub">Treat the rule as one factor to weigh against cost.</div>
+          <div class="gl-names" id="gl-all"></div>
+          <div class="gl-sub">
+            Models described by their developers as agentic-RL systems show up at both extremes, and so do models
+            described as safety-aligned assistants. Benchmark scores do not separate them either.
+          </div>
         </div>
       </div>
     </div>
@@ -102,9 +109,11 @@
     <div class="head">
       <h2>One rule, twelve different agents</h2>
       <p>
-        Given the exact same rule, the models behave like two species. Safety-tuned models obey across every phrasing
-        and fine. Task-optimized models obey only when the rule is a command, or when the math favors it. One quirk shows
-        up below: adding a small, beatable fine often <i>lowers</i> compliance, because a stated fine reads as a price.
+        Given the exact same rule, compliance ranges over 46 points, from 43.5% to 89.5%, on the choice of model alone.
+        The models also differ in <i>which</i> pressure breaks them. Some treat the rule as binding however it is worded;
+        others obey only when it is phrased as a command, or only when the math favors it &mdash; and those two weaknesses
+        do not travel together. One quirk shows up below: adding a small, beatable fine often <i>lowers</i> compliance,
+        because a stated fine reads as a price.
       </p>
     </div>
 
@@ -201,8 +210,8 @@
       <h2>What peers and bosses do to compliance</h2>
       <p>
         Now we add one more signal and watch the whole compliance curve shift. A manager's blanket approval or a board
-        cost policy pushes compliance down hard, even for safety-tuned models. Peer outcomes cut both ways: a peer who
-        was fined pushes it up, a peer who got away with it pushes it down.
+        cost policy pushes compliance down hard, even for the models that are otherwise most rule-anchored. Peer outcomes
+        cut both ways: a peer who was fined pushes it up, a peer who got away with it pushes it down.
       </p>
     </div>
     <div class="dash">
@@ -264,9 +273,13 @@
     <div class="head">
       <h2>When a model breaks the rule, does it admit it?</h2>
       <p>
-        Usually yes. It either names the rule and overrides it, or mentions it in passing. The worry is the
-        <b class="hl-red">silent</b> break, where the agent picks an uncertified vendor without ever referring to the
-        rule. An audit that only reads the agent's reasoning would miss it. Models are sorted from most open to most silent.
+        Usually yes: 96% of violations name the rule, either overriding it outright or mentioning it in passing. The
+        worry is the remaining 4%, the <b class="hl-red">silent</b> break, where the agent picks an uncertified vendor
+        without ever referring to the rule &mdash; an audit that only reads the agent's reasoning would miss it. Silent
+        rates do <i>not</i> track how often a model breaks the rule: the two highest belong to Mistral Small and
+        Qwen&nbsp;3.5, among the most compliant models here, while Llama&nbsp;4 is just as compliant and the least
+        silent of all. Picking a model for compliance does not pick one you can audit. Models are sorted from most open
+        to most silent.
       </p>
     </div>
     <div class="dash">
@@ -274,7 +287,8 @@
         <div class="controls"><div class="ctl"><span>Setting</span>
           <div class="seg" id="seg-reason">
             <button data-v="base" class="active">Baseline</button>
-            <button data-v="mand">Under pressure</button>
+            <button data-v="press">Under pressure</button>
+            <button data-v="mand">Pressure + mandate</button>
           </div></div></div>
       </div>
       <div class="dash-body"><div class="chartwrap"><div id="bars-reason"></div></div>
@@ -312,6 +326,28 @@
         </div>
         <p class="count-note" id="exp-count"></p>
         <div class="resp-list" id="resp-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CITE ===================== -->
+<section id="cite" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <h2>Cite this work</h2>
+      <p>The paper appeared at the 2026 AAAI/ACM Conference on AI, Ethics, and Society, and at the
+        2026 Conference on Language Modeling Workshop on Agent Behavior. Please cite the conference version.</p>
+    </div>
+    <div class="dash">
+      <div class="dash-body">
+        <pre class="bibtex" id="bibtex">@inproceedings{okamoto2026legalincentives,
+  title     = {Why Do AI Agents Break Rules? How Framing, Context,
+               and Social Signals Shape Compliance},
+  author    = {Okamoto, Mika and Erol, Ansel Kaplan and Erol, Kutluhan},
+  booktitle = {AAAI/ACM Conference on AI, Ethics, and Society (AIES)},
+  year      = {2026},
+}</pre>
       </div>
     </div>
   </div>

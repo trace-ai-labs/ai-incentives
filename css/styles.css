@@ -19,8 +19,8 @@
   --red:       #e23b4e;   /* violation */
   --red-d:     #c01f33;
   --amber:     #f59e0b;   /* urgency / caution */
-  --teal:      #0e9384;   /* group I */
-  --violet:    #6b46e0;   /* group II */
+  --teal:      #0e9384;   /* per-model series colour */
+  --violet:    #6b46e0;   /* per-model series colour */
 
   --radius:    16px;
   --radius-s:  10px;
@@ -337,3 +337,10 @@ footer a { font-weight:600; }
   .seg button { font-size: .78rem; }
   .chartwrap svg.chart { min-width: 380px; }
 }
+
+/* venue line under the hero authors, and the BibTeX block */
+.hero .venue { margin:10px 0 0; font-size:.86rem; color:var(--muted); line-height:1.5; }
+.hero .venue .sep { color:var(--line-2); margin:0 7px; }
+pre.bibtex { margin:0; padding:16px 18px; overflow-x:auto; font-family:var(--mono);
+  font-size:.8rem; line-height:1.65; color:var(--ink); background:var(--bg-alt);
+  border-radius:8px; white-space:pre; }

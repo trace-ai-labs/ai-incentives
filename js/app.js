@@ -11,9 +11,9 @@ if (!D) { console.error("SITE_DATA missing"); return; }
 const ORDER = D.meta.model_order;
 const M = {}; D.meta.models.forEach(m => { M[m.short] = m; });
 const NAME  = s => (M[s] ? M[s].name : s);
-const GROUP = s => (M[s] ? M[s].group : "II");
-const GROUP_I  = ORDER.filter(s => GROUP(s) === "I");
-const GROUP_II = ORDER.filter(s => GROUP(s) === "II");
+// No GROUP lookup: the paper tested whether a two-way split by
+// developer-stated training philosophy predicts compliance and found that it
+// does not, so the site reports models individually.
 const KEY6 = ["gpt-oss", "qwen", "grok", "deepseek", "gemini", "glm"];
 const MCOLOR = {
   "gpt-oss":"#0e9384","qwen":"#15a3b8","llama":"#2bb58a",
@@ -204,29 +204,28 @@ function renderSetup(){
   if(fnp){ fnp.innerHTML=""; FINS.forEach(f=>{
     const s=document.createElement("span"); s.className="pill"; s.textContent=FIN_SHORT[f];
     s.style.cursor="help"; bindTip(s,()=>condTip(FIN_FULL[f],DESC.fin[f])); fnp.appendChild(s); }); }
-  [["gl-I",GROUP_I],["gl-II",GROUP_II]].forEach(([id,group])=>{
-    const el=document.getElementById(id); if(!el) return; el.innerHTML="";
-    group.forEach((m,i)=>{
+  const ml=document.getElementById("gl-all");
+  if(ml){ ml.innerHTML="";
+    ORDER.forEach((m,i)=>{
       const s=document.createElement("span"); s.className="gm"; s.textContent=NAME(m);
-      bindTip(s,()=>`<div class="t-title">${NAME(m)}</div><div class="t-row"><span>${MINFO[m].dev}</span><b>Group ${GROUP(m)}</b></div><div class="t-desc">${MINFO[m].emph}</div>`);
-      el.appendChild(s);
-      if(i<group.length-1) el.appendChild(document.createTextNode(" · "));
+      bindTip(s,()=>`<div class="t-title">${NAME(m)}</div><div class="t-row"><span>${MINFO[m].dev}</span></div><div class="t-desc">${MINFO[m].emph}</div>`);
+      ml.appendChild(s);
+      if(i<ORDER.length-1) ml.appendChild(document.createTextNode(" · "));
     });
-  });
+  }
 }
 
 /* ============================================================
    model selector
    ============================================================ */
 function renderModelBar(){
-  const bar=$("#modelbar"); bar.innerHTML="";
-  const lab=t=>{ const s=document.createElement("span"); s.className="glabel"; s.textContent=t; bar.appendChild(s); };
-  lab("SAFETY-TUNED"); GROUP_I.forEach(s=>bar.appendChild(chip(s,"g1")));
-  lab("TASK-OPTIMIZED"); GROUP_II.forEach(s=>bar.appendChild(chip(s,"g2")));
+  const bar=$("#modelbar"); if(!bar) return; bar.innerHTML="";
+  ORDER.forEach(s=>bar.appendChild(chip(s)));
 }
-function chip(s,cls){
+function chip(s){
   const c=document.createElement("span");
-  c.className=`chip ${cls}`+(state.models.has(s)?" on":"");
+  c.className="chip"+(state.models.has(s)?" on":"");
+  c.style.color=MCOLOR[s]||"";
   c.innerHTML=`<span class="gd"></span>${NAME(s)}`;
   c.onclick=()=>{ if(state.models.has(s)){ if(state.models.size>1) state.models.delete(s); } else state.models.add(s); syncChips(); rerenderAll(); };
   return c;
@@ -240,7 +239,7 @@ function syncChips(){
 function bindPresets(){
   document.querySelectorAll(".chip.preset").forEach(p=>{
     p.onclick=()=>{ const v=p.dataset.preset;
-      state.models=new Set(v==="all"?ORDER:v==="I"?GROUP_I:v==="II"?GROUP_II:KEY6);
+      state.models=new Set(v==="all"?ORDER:KEY6);
       syncChips(); rerenderAll(); };
   });
 }
@@ -257,14 +256,14 @@ function bindSeg(id, key, cb){
    colGroups: [{label, cols:[{key,label,desc,...extra}]}]
    matchFn(model, col) -> cell|null
    ============================================================ */
-const GNAME = {I:"Safety-tuned", II:"Task-optimized"};
-const GCOLOR = {I:"#0e9384", II:"#6b46e0"};
 function renderHeatmap(elId, colGroups, matchFn){
   const el=document.getElementById(elId); if(!el) return; el.innerHTML="";
   const grouped = colGroups.length>1 || colGroups[0].label;
   const table=document.createElement("table");
   const thead=document.createElement("thead");
-  const lead=()=>{ const a=document.createElement("th"); const b=document.createElement("th"); return [a,b]; };
+  // One leading cell (the row header). There used to be a second, a vertical
+  // bracket labelling the training group; the paper dropped that partition.
+  const lead=()=>[document.createElement("th")];
 
   if(grouped){
     const gr=document.createElement("tr"); lead().forEach(t=>gr.appendChild(t)); // bracket + rowh cols
@@ -286,23 +285,12 @@ function renderHeatmap(elId, colGroups, matchFn){
   });
   thead.appendChild(hr); table.appendChild(thead);
 
-  // group selected models into contiguous runs (ORDER keeps group I before II)
-  const runs=[];
-  selModels().forEach(m=>{ const g=GROUP(m);
-    if(!runs.length || runs[runs.length-1].g!==g) runs.push({g, ms:[]});
-    runs[runs.length-1].ms.push(m); });
-
   const tbody=document.createElement("tbody");
-  runs.forEach(run=>{
-    run.ms.forEach((m,ri)=>{
+  {
+    selModels().forEach(m=>{
       const tr=document.createElement("tr");
-      if(ri===0){
-        const bk=document.createElement("th"); bk.className="brk "+run.g; bk.rowSpan=run.ms.length;
-        bk.innerHTML = run.ms.length>=2 ? `<span class="brk-txt">${GNAME[run.g]}</span>` : "";
-        tr.appendChild(bk);
-      }
       const rh=document.createElement("th"); rh.className="rowh";
-      rh.textContent=NAME(m); rh.style.color=GCOLOR[run.g]; tr.appendChild(rh);
+      rh.textContent=NAME(m); rh.style.color=MCOLOR[m]||"#14171f"; tr.appendChild(rh);
       colGroups.forEach((grp,gi)=>{
         grp.cols.forEach(col=>{
           const td=document.createElement("td"); td.className="cell";
@@ -317,7 +305,7 @@ function renderHeatmap(elId, colGroups, matchFn){
       });
       tbody.appendChild(tr);
     });
-  });
+  }
   table.appendChild(tbody); el.appendChild(table);
 }
 
@@ -390,7 +378,7 @@ function renderParadox(){
     const pts=FINS.map((f,i)=>{ const c=idxControls.get([m,state.paradoxFraming,f].join("|")); const r=rate(c);
       return r===null?null:{x:xs[i],y:yOf(r),v:r,fin:f}; }).filter(Boolean);
     if(pts.length<2) return;
-    const col=GCOLOR[GROUP(m)];   // color by training group
+    const col=MCOLOR[m]||"#6b7280";   // color per model (there is no group to colour by)
     const path=E("path",{d:pts.map((p,i)=>(i?"L":"M")+p.x+" "+p.y).join(" "),fill:"none",stroke:col,
       "stroke-width":2.2,"stroke-linejoin":"round","stroke-linecap":"round",opacity:0.5});
     svg.appendChild(path);
@@ -606,9 +594,12 @@ function renderReasoning(){
   const el=$("#bars-reason"); el.innerHTML="";
   const segs=[{i:0,color:"#1f6fe5"},{i:1,color:"#9aa4b2"},{i:2,color:"#e23b4e"},{i:3,color:"#f59e0b"}];
   const dmap={}; D.reasoning.forEach(r=>dmap[r.m]=r);
-  let models=selModels().filter(m=>dmap[m]);
+  // A null regime means the model produced no violations to classify there
+  // (Qwen under the anti-adversarial mandate); drop it rather than plot zeros.
+  let models=selModels().filter(m=>dmap[m] && dmap[m][state.reason]);
   const valOf=m=>{ const v=(dmap[m][state.reason]||[]).slice(); while(v.length<4)v.push(0);
     const t=v.reduce((a,b)=>a+b,0)||1; return v.map(x=>100*x/t); };
+  if(!models.length){ el.innerHTML='<p class="note">No violations to classify in this setting for the selected models.</p>'; return; }
   // sort by silent rate ascending (most transparent first)
   models.sort((a,b)=> valOf(a)[2]-valOf(b)[2]);
   // aggregate mean across selected models, shown as the top bar
@@ -680,7 +671,7 @@ function renderScatter(){
   const placedR=[], placedL=[];
   pts.sort((a,b)=>yOf(a.fy)-yOf(b.fy));
   pts.forEach(p=>{
-    const col=GROUP(p.m)==="I"?"#0e9384":"#6b46e0";
+    const col=MCOLOR[p.m]||"#6b7280";
     const cx=xOf(p.fx),cy=yOf(p.fy);
     const left = cx > padL+plotW*0.5;
     const placed = left?placedL:placedR;
@@ -688,7 +679,7 @@ function renderScatter(){
     for(const q of placed){ if(Math.abs(ly-q.ly)<15){ ly=q.ly+15; } }
     placed.push({ly});
     const c=E("circle",{cx,cy,r:6.5,fill:col,opacity:.85,stroke:"#fff","stroke-width":1.5}); c.style.cursor="pointer";
-    bindTip(c, ()=>`<div class="t-title">${NAME(p.m)} · Group ${GROUP(p.m)}</div>`
+    bindTip(c, ()=>`<div class="t-title">${NAME(p.m)}</div>`
       +`<div class="t-row"><span>Drop when not a command</span><b>${p.fx.toFixed(0)}%</b></div>`
       +`<div class="t-row"><span>Drop when a fine appears</span><b>${p.fy.toFixed(0)}%</b></div>`);
     if(Math.abs(ly-(cy+4))>1)

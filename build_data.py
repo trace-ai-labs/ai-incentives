@@ -1,38 +1,42 @@
 #!/usr/bin/env python3
 """Aggregate the raw experiment JSONL into a compact data.json for the website.
 
-Reads from the cloned ai-incentives repo's combined results and emits:
+Reads from the cloned trace-ai-labs/llm-compliance repo's per-experiment results and
+emits:
   - aggregated compliance cells per experiment (model x condition axes)
   - a curated sample of agent transcripts for the response explorer
 
-Run:  python3 build_data.py /path/to/ai-incentives  ./data/data.json
+Run:  python3 build_data.py /path/to/llm-compliance  ./data/data.json
 """
 import json, glob, os, sys, collections, random
 
-SRC = sys.argv[1] if len(sys.argv) > 1 else "/tmp/ai-incentives"
+SRC = sys.argv[1] if len(sys.argv) > 1 else "/tmp/llm-compliance"
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(__file__), "data", "data.js")
-COMBINED = os.path.join(SRC, "results", "paper_multimodel", "_combined")
+COMBINED = os.path.join(SRC, "results", "data")
 
-# ---- model registry: openrouter id -> (display, short, group, developer) ----
+# ---- model registry: openrouter id -> (display, short, developer) ----
+# No training-orientation group column: the paper tested whether a two-way
+# split by developer-stated training philosophy predicts compliance, found
+# that it does not, and reports models individually instead.
 MODELS = {
-    "openai/gpt-oss-120b":              ("GPT-OSS-120B",   "gpt-oss",   "I",  "OpenAI"),
-    "qwen/qwen3.5-flash-02-23":         ("Qwen 3.5 Flash", "qwen",      "I",  "Alibaba"),
-    "meta-llama/llama-4-maverick":      ("Llama 4 Maverick","llama",    "I",  "Meta"),
-    "moonshotai/kimi-k2.5":             ("Kimi K2.5",      "kimi",      "II", "Moonshot"),
-    "nvidia/nemotron-3-super-120b-a12b":("Nemotron 3 Super","nemotron", "II", "NVIDIA"),
-    "minimax/minimax-m2.7":             ("MiniMax M2.7",   "minimax",   "II", "MiniMax"),
-    "mistralai/mistral-small-2603":     ("Mistral Small",  "mistral",   "II", "Mistral AI"),
-    "deepseek/deepseek-v3.2":           ("DeepSeek V3.2",  "deepseek",  "II", "DeepSeek"),
-    "x-ai/grok-4.1-fast":               ("Grok 4.1 Fast",  "grok",      "II", "xAI"),
-    "google/gemini-3-flash-preview":    ("Gemini 3 Flash", "gemini",    "II", "Google"),
-    "google/gemma-4-31b-it":            ("Gemma 4 31B",    "gemma",     "II", "Google"),
-    "z-ai/glm-4.7-flash":               ("GLM 4.7 Flash",  "glm",       "II", "Z.ai"),
+    "openai/gpt-oss-120b":              ("GPT-OSS-120B",   "gpt-oss",   "OpenAI"),
+    "qwen/qwen3.5-flash-02-23":         ("Qwen 3.5 Flash", "qwen",      "Alibaba"),
+    "meta-llama/llama-4-maverick":      ("Llama 4 Maverick","llama",    "Meta"),
+    "moonshotai/kimi-k2.5":             ("Kimi K2.5",      "kimi",      "Moonshot"),
+    "nvidia/nemotron-3-super-120b-a12b":("Nemotron 3 Super","nemotron", "NVIDIA"),
+    "minimax/minimax-m2.7":             ("MiniMax M2.7",   "minimax",   "MiniMax"),
+    "mistralai/mistral-small-2603":     ("Mistral Small",  "mistral",   "Mistral AI"),
+    "deepseek/deepseek-v3.2":           ("DeepSeek V3.2",  "deepseek",  "DeepSeek"),
+    "x-ai/grok-4.1-fast":               ("Grok 4.1 Fast",  "grok",      "xAI"),
+    "google/gemini-3-flash-preview":    ("Gemini 3 Flash", "gemini",    "Google"),
+    "google/gemma-4-31b-it":            ("Gemma 4 31B",    "gemma",     "Google"),
+    "z-ai/glm-4.7-flash":               ("GLM 4.7 Flash",  "glm",       "Z.ai"),
 }
 MODEL_ORDER = ["gpt-oss","qwen","llama","kimi","nemotron","minimax","mistral",
                "deepseek","grok","gemini","gemma","glm"]
 
 def short(model_id):
-    return MODELS.get(model_id, (None, None, None, None))[1]
+    return MODELS.get(model_id, (None, None, None))[1]
 
 def load(name):
     path = os.path.join(COMBINED, name)
@@ -106,37 +110,37 @@ def mandate_norm(r):
 data = {}
 
 # ---- Foundational controls: framing x fin ----
-controls = load("shared_controls.jsonl")
+controls = load("controls.jsonl")
 data["controls"] = cells(controls, [("framing", md("framing")), ("fin", md("fin_level"))])
 
 # ---- Wording ablation: obligation verb variant x framing x fin ----
-wording = load("exp2_wording.jsonl")
+wording = load("wording.jsonl")
 # The obligation verb itself is the framing manipulation here (framing field is null),
 # so we key on the verb variant x fine level.
 data["wording"] = cells([r for r in wording if r.get("metadata", {}).get("variant")],
                         [("variant", md("variant")), ("fin", md("fin_level"))])
 
 # ---- Institutional authority: authority x fin ----
-exp3 = load("exp3_institutional.jsonl")
+exp3 = load("authority.jsonl")
 data["authority"] = cells(exp3, [("authority", axis_or_control("authority")), ("fin", md("fin_level"))])
 
 # ---- Social signals: peer signal x fin ----
-exp4 = load("exp4_social.jsonl")
+exp4 = load("peer_signals.jsonl")
 data["social"] = cells(exp4, [("social", axis_or_control("social")), ("fin", md("fin_level"))])
 
 # ---- Normative pressure: norm x fin (informational framing) ----
-exp6 = load("exp6_normative.jsonl")
+exp6 = load("norms.jsonl")
 data["norm"] = cells([r for r in exp6 if r.get("metadata", {}).get("framing") == "informational"],
                      [("norm", axis_or_control("norm")), ("fin", md("fin_level"))])
 
 # ---- Employee pressure x mandate x fin ----
-exp8 = load("exp8_mandate_vs_pressure.jsonl")
+exp8 = load("pressure.jsonl")
 data["pressure"] = cells(exp8, [("pressure", axis_or_control("pressure")),
                                 ("mandate", mandate_norm),
                                 ("fin", md("fin_level"))])
 
 # ---- Stakes (item criticality) ----
-stakes = load("exp_stakes.jsonl")
+stakes = load("stakes.jsonl")
 data["stakes"] = cells(stakes, [("stakes", md("stakes")),
                                 ("framing", md("framing")),
                                 ("fin", md("fin_level"))])
@@ -171,25 +175,29 @@ def mt_cells(rows, extra_dims):
         res.append(d)
     return res
 
-exp9 = load("exp9_multiturn.jsonl")
+exp9 = load("multiturn.jsonl")
 data["multiturn"] = mt_cells(exp9, [("framing", md("framing")), ("fin", md("fin_level"))])
 
-# ---- Reasoning transparency (from paper Table; authoritative) ----
-# Foundational baselines + pressures-with-anti-adversarial-mandate.
+# ---- Reasoning transparency (from the paper's table; authoritative) ----
+# Taken verbatim from paper/generated/table_violation_reasoning.tex, i.e. the
+# camera-ready two-stage re-judge, NOT the earlier single-pass labels. Three
+# regimes: foundational baselines, pressures with no mandate, and pressures
+# under the anti-adversarial mandate. `None` means that regime had no
+# violations to classify (Qwen never violates under the mandate).
 data["reasoning"] = [
-    # short, group, base hedge/ack/silent, mandate hedge/ack/silent/mandatecite
-    {"m": "gpt-oss",  "base": [52, 48, 0],  "mand": [93, 7, 0, 0]},
-    {"m": "qwen",     "base": [71, 24, 5],  "mand": [95, 3, 2, 0]},
-    {"m": "llama",    "base": [79, 21, 0],  "mand": [90, 8, 1, 0]},
-    {"m": "kimi",     "base": [58, 31, 11], "mand": [60, 27, 11, 2]},
-    {"m": "nemotron", "base": [71, 17, 12], "mand": [85, 12, 2, 0]},
-    {"m": "minimax",  "base": [70, 27, 3],  "mand": [83, 15, 2, 1]},
-    {"m": "mistral",  "base": [32, 53, 15], "mand": [46, 42, 12, 0]},
-    {"m": "deepseek", "base": [63, 32, 5],  "mand": [83, 13, 3, 1]},
-    {"m": "grok",     "base": [75, 22, 3],  "mand": [90, 8, 2, 0]},
-    {"m": "gemini",   "base": [86, 12, 2],  "mand": [93, 4, 3, 0]},
-    {"m": "gemma",    "base": [87, 12, 1],  "mand": [86, 8, 5, 1]},
-    {"m": "glm",      "base": [42, 44, 14], "mand": [49, 37, 12, 1]},
+    # short, base H/A/S, press H/A/S, mand H/A/S/MandateCite
+    {"m": "gpt-oss", "base": [46, 46, 7], "press": [90, 10, 0], "mand": [89, 11, 0, 0]},
+    {"m": "qwen", "base": [62, 11, 27], "press": [95, 5, 0], "mand": None},
+    {"m": "llama", "base": [75, 13, 12], "press": [89, 11, 0], "mand": [94, 5, 0, 1]},
+    {"m": "kimi", "base": [69, 21, 10], "press": [85, 15, 0], "mand": [79, 13, 0, 9]},
+    {"m": "nemotron", "base": [60, 32, 8], "press": [88, 11, 1], "mand": [75, 21, 1, 3]},
+    {"m": "minimax", "base": [68, 20, 12], "press": [89, 11, 0], "mand": [86, 10, 1, 3]},
+    {"m": "mistral", "base": [53, 26, 21], "press": [78, 17, 5], "mand": [60, 31, 8, 1]},
+    {"m": "deepseek", "base": [67, 25, 7], "press": [85, 14, 1], "mand": [88, 8, 0, 5]},
+    {"m": "grok", "base": [73, 14, 13], "press": [95, 5, 0], "mand": [96, 4, 0, 0]},
+    {"m": "gemini", "base": [86, 4, 10], "press": [90, 10, 0], "mand": [98, 2, 0, 0]},
+    {"m": "gemma", "base": [80, 8, 12], "press": [80, 15, 5], "mand": [90, 7, 0, 3]},
+    {"m": "glm", "base": [70, 17, 13], "press": [78, 19, 3], "mand": [63, 30, 3, 5]},
 ]
 
 # ---- Response explorer: curated transcript samples ----
@@ -265,10 +273,10 @@ responses += sample_multiturn(exp9, "Multi-turn", max_total=120)
 data["responses"] = responses
 
 # ---- meta ----
-SINGLE = ["shared_controls.jsonl", "exp2_wording.jsonl", "exp3_institutional.jsonl",
-          "exp4_social.jsonl", "exp6_normative.jsonl", "exp8_mandate_vs_pressure.jsonl",
-          "exp_stakes.jsonl", "exp10_urgency_followup.jsonl"]
-MULTI = ["exp9_multiturn.jsonl", "exp9_exp8_multiturn.jsonl"]
+SINGLE = ["controls.jsonl", "wording.jsonl", "authority.jsonl",
+          "peer_signals.jsonl", "norms.jsonl", "pressure.jsonl",
+          "stakes.jsonl", "urgency.jsonl"]
+MULTI = ["multiturn.jsonl", "multiturn_pressure.jsonl"]
 single_rows = sum(len(load(f)) for f in SINGLE)
 multi_rows = sum(len(load(f)) for f in MULTI)
 total_trials = single_rows + multi_rows               # distinct scenario runs
@@ -291,8 +299,8 @@ import statistics as _st
 paradox_drops = [round(d) for d in drops]
 
 data["meta"] = {
-    "models": [{"short": MODELS[k][1], "name": MODELS[k][0], "group": MODELS[k][2],
-                "dev": MODELS[k][3]} for k in MODELS],
+    "models": [{"short": MODELS[k][1], "name": MODELS[k][0],
+                "dev": MODELS[k][2]} for k in MODELS],
     "model_order": MODEL_ORDER,
     "total_trials": total_trials,
     "total_responses": total_responses,
