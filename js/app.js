@@ -212,10 +212,10 @@ function renderStatCards(){
   const cards = [
     {cls:"blue",  num:"12", lbl:"language models tested, from safety-tuned assistants to task-optimized agents."},
     {cls:"warn",  num:"46", unit:"pts", lbl:`spread in compliance across those models under the identical rule, from 43.5% to 89.5%.`},
-    {cls:"amber", num:"≤45", unit:"%", lbl:"the best most models manage under a deadline, even when told to follow the law no matter what."},
+    {cls:"amber", num:"≤45", unit:"%", lbl:"what most models manage under a deadline, even when told to follow the law no matter what."},
   ];
   $("#stat-cards").innerHTML = cards.map(c =>
-    `<div class="stat ${c.cls}"><div class="num">${c.num}${c.unit?`<span class="unit"> ${c.unit}</span>`:""}</div><div class="lbl">${c.lbl}</div></div>`
+    `<div class="stat ${c.cls}"><div class="num">${c.num}${c.unit?`<span class="unit">${/^[a-z]/i.test(c.unit)?" ":""}${c.unit}</span>`:""}</div><div class="lbl">${c.lbl}</div></div>`
   ).join("");
 }
 

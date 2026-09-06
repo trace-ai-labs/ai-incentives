@@ -141,7 +141,8 @@ table.data tr.dom td { background: #fdf2f3; }
 .dash { background:#fff; border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; }
 .dash + .dash { margin-top: 20px; }
 .dash + .grid-2 { margin-top: 32px; }
-.grid-2 > .dash { margin-top: 0; height: 100%; }
+.grid-2 { align-items: start; }
+.grid-2 > .dash { margin-top: 0; }
 .grid-2 > .dash .dash-head { min-height: 92px; }
 .dash-head { padding: 16px 20px; border-bottom: 1px solid var(--line); display:flex; flex-wrap:wrap; align-items:center; gap:14px; }
 .dash-head h3 { margin:0; font-size: 1.06rem; font-family: var(--sans); font-weight:650; display:flex; align-items:center; gap:8px; }
@@ -234,7 +235,7 @@ svg.chart .axis { stroke: var(--line-2); stroke-width:1; }
 .callout { display:flex; gap:13px; align-items:flex-start; margin-top:18px; padding:15px 17px; border-radius:12px; border:1px solid var(--line-2); background: var(--bg-alt); }
 .callout.urgency { background: #fff8ec; border-color:#f4d79a; }
 .callout.blue { background: var(--bg-tint); border-color:#c5d9f7; }
-.callout .ico { font-size:1.15rem; line-height:1.3; }
+.callout .ico { display:none; }
 .callout p { margin:0; font-size:.92rem; color:var(--ink-2); }
 
 /* disclosure */
