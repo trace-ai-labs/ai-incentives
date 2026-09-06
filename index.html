@@ -105,13 +105,19 @@
     <div class="head">
       <h2>What we found</h2>
     </div>
-    <ul class="findings">
-      <li>Given the same rule, compliance ranges from 43.5% to 89.5% on the choice of model alone. Which model you deploy is itself a governance decision.</li>
-      <li>Stating a fine can lower compliance. When the penalty is cheaper than compliance, several models treat the rule as a price and pay it.</li>
-      <li>A deadline beats every defense. Even with a built-in follow-the-law instruction, urgency gets past eleven of the twelve models.</li>
-      <li>A manager's approval, a board cost policy, or a peer who got away with it each push compliance down. A peer who was fined pushes it up.</li>
-      <li>Does embedding the rule in the system prompt make an agent compliant on its own? No. Benchmark scores and the developer's stated training focus do not predict which models hold the rule.</li>
-    </ul>
+    <details class="more">
+      <summary><span class="tri">&#9656;</span> Key findings <span class="more-sub">from the paper</span></summary>
+      <div class="more-body">
+        <ul class="findings">
+          <li>Under identical conditions, compliance spans 46 percentage points across the twelve models, from 43.5% to 89.5%, on the choice of model alone.</li>
+          <li>Specifying a financial penalty can turn a categorical legal obligation into a cost-benefit calculation that favors violation. A small, beatable fine lowers compliance for several models.</li>
+          <li>Models differ in which pressure breaks them. Some treat the regulation as binding however it is worded; others fail where deterrence theory predicts, under low penalties and non-command phrasing.</li>
+          <li>Financial incentives, managerial demands, peer outcomes, and employee pressure each produce large compliance failures. A deadline gets past a built-in follow-the-law instruction for eleven of the twelve models.</li>
+          <li>Benchmark scores and developers' own descriptions of post-training do not predict where a model falls.</li>
+          <li>Embedding the rule in the system prompt is not on its own enough to produce a compliant agent. Model selection is itself a governance decision.</li>
+        </ul>
+      </div>
+    </details>
     <details class="more">
       <summary><span class="tri">&#9656;</span> Abstract <span class="more-sub">from the AIES 2026 paper</span></summary>
       <div class="more-body">

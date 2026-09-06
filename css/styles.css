@@ -346,6 +346,6 @@ pre.bibtex { margin:0; padding:16px 18px; overflow-x:auto; font-family:var(--mon
   border-radius:8px; white-space:pre; }
 
 /* key findings */
-.findings { max-width: 72ch; margin: 0 0 6px; padding-left: 1.25em; }
-.findings li { margin-bottom: 10px; font-size: 1.02rem; color: var(--ink-2); }
+.findings { margin: 12px 0 0; padding-left: 1.25em; }
+.findings li { margin-bottom: 9px; font-size: .98rem; color: var(--ink-2); }
 #findings details.more { max-width: 72ch; }
