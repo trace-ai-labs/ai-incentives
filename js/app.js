@@ -740,8 +740,8 @@ function renderScatter(){
     if(far) svg.appendChild(E("line",{x1:cx,y1:cy,x2:pick.b.x+w/2,y2:pick.b.y+LH/2,stroke:col,"stroke-width":.8,opacity:.4}));
     svg.appendChild(txt(name,tx,ty,{fill:col,"text-anchor":pick.cd.anchor,style:(narrow?"font-size:11px;":"font-size:13px;")+"font-weight:700"}));
   });
-  if(narrow) htmlLegend(el, pts.map((p,i)=>({key:p.m,label:`${i+1}  ${NAME(p.m)}`,col:MCOLOR[p.m]||"#6b7280"})));
   el.appendChild(svg);
+  if(narrow) htmlLegend(el, pts.map((p,i)=>({key:p.m,label:`${i+1}  ${NAME(p.m)}`,col:MCOLOR[p.m]||"#6b7280"})));
 }
 
 /* ============================================================
