@@ -666,26 +666,44 @@ function renderScatter(){
   svg.appendChild(txt("ROBUST",xOf(2),yOf(3),{style:"font-size:14px;font-weight:700;fill:#1f6fe5"}));
   svg.appendChild(txt("FRAGILE",xOf(98),yOf(97),{"text-anchor":"end",style:"font-size:14px;font-weight:700;fill:#c01f33"}));
 
-  // label placement: anchor to the left for right-half points so long labels
-  // don't run into neighboring dots; nudge vertically to avoid collisions.
-  const placedR=[], placedL=[];
-  pts.sort((a,b)=>yOf(a.fy)-yOf(b.fy));
-  pts.forEach(p=>{
+  // label placement: try right, left, above, below of each dot (then farther
+  // offsets), keep the first spot that overlaps neither another label nor a dot,
+  // and keep every label inside the plot so the bottom row is not clipped.
+  const CH=7.2, LH=14;
+  const dots=pts.map(p=>({x:xOf(p.fx),y:yOf(p.fy)}));
+  const boxes=[];
+  const hit=(a,b)=> a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y;
+  const inside=b=> b.x>=padL-4 && b.x+b.w<=W-4 && b.y>=padT-2 && b.y+b.h<=padT+plotH+2;
+  pts.forEach((p,i)=>{
     const col=MCOLOR[p.m]||"#6b7280";
-    const cx=xOf(p.fx),cy=yOf(p.fy);
-    const left = cx > padL+plotW*0.5;
-    const placed = left?placedL:placedR;
-    let lx = left ? cx-9 : cx+9, ly = cy+4;
-    for(const q of placed){ if(Math.abs(ly-q.ly)<15){ ly=q.ly+15; } }
-    placed.push({ly});
+    const cx=dots[i].x, cy=dots[i].y, name=NAME(p.m), w=name.length*CH;
     const c=E("circle",{cx,cy,r:6.5,fill:col,opacity:.85,stroke:"#fff","stroke-width":1.5}); c.style.cursor="pointer";
-    bindTip(c, ()=>`<div class="t-title">${NAME(p.m)}</div>`
+    bindTip(c, ()=>`<div class="t-title">${name}</div>`
       +`<div class="t-row"><span>Drop when not a command</span><b>${p.fx.toFixed(0)}%</b></div>`
       +`<div class="t-row"><span>Drop when a fine appears</span><b>${p.fy.toFixed(0)}%</b></div>`);
-    if(Math.abs(ly-(cy+4))>1)
-      svg.appendChild(E("line",{x1:cx,y1:cy,x2: left?lx+3:lx-3,y2:ly-3,stroke:col,"stroke-width":.8,opacity:.4}));
     svg.appendChild(c);
-    svg.appendChild(txt(NAME(p.m),lx,ly,{fill:col,"text-anchor":left?"end":"start",style:"font-size:13px;font-weight:600"}));
+    const cands=[];
+    [10,26,42].forEach(d=>{
+      cands.push({x:cx+d, y:cy-LH/2, anchor:"start"});
+      cands.push({x:cx-d-w, y:cy-LH/2, anchor:"end"});
+      cands.push({x:cx-w/2, y:cy-d-LH+4, anchor:"middle"});
+      cands.push({x:cx-w/2, y:cy+d-4, anchor:"middle"});
+    });
+    let pick=null;
+    for(const cd of cands){
+      const b={x:cd.x,y:cd.y,w,h:LH};
+      if(!inside(b)) continue;
+      if(boxes.some(o=>hit(b,o))) continue;
+      if(dots.some((d,j)=> j!==i && hit(b,{x:d.x-8,y:d.y-8,w:16,h:16}))) continue;
+      pick={b,cd}; break;
+    }
+    if(!pick){ const cd=cands[0]; pick={b:{x:cd.x,y:cd.y,w,h:LH},cd}; }
+    boxes.push(pick.b);
+    const tx = pick.cd.anchor==="start"? pick.b.x : pick.cd.anchor==="end"? pick.b.x+w : pick.b.x+w/2;
+    const ty = pick.b.y+LH-3;
+    const far = Math.hypot((pick.b.x+w/2)-cx,(pick.b.y+LH/2)-cy) > 40;
+    if(far) svg.appendChild(E("line",{x1:cx,y1:cy,x2:pick.b.x+w/2,y2:pick.b.y+LH/2,stroke:col,"stroke-width":.8,opacity:.4}));
+    svg.appendChild(txt(name,tx,ty,{fill:col,"text-anchor":pick.cd.anchor,style:"font-size:13px;font-weight:600"}));
   });
   el.appendChild(svg);
 }
