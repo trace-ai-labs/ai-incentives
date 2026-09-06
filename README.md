@@ -1,12 +1,21 @@
-# What Makes AI Agents Follow the Rules? (AIES 2026) - project website
+# Why Do AI Agents Break Rules? How Framing, Context, and Social Signals Shape Compliance
 
-Interactive results site for our AIES 2026 study of AI agent compliance, the paper *"Why Do AI Agents Break Rules? How Framing,
-Context, and Social Signals Shape Compliance"* (AIES 2026; COLM 2026 Workshop on Agent
-Behavior). `paper.pdf` is the arXiv build of the AIES camera-ready -- copy it from
-`paper/main_arxiv.pdf` in the experiment repo whenever the paper changes.
-A single-page, dependency-free static site that lets you filter the study's results by
-model, rule framing, enforcement level, pressure tactic, and more — and read the raw
-agent transcripts behind the numbers.
+Interactive results site for our AIES 2026 paper on what makes AI agents follow the
+rules. Twelve instruction-tuned LLMs act as an enterprise procurement assistant under one
+legal rule, and the site lets you filter every result by model, rule framing, enforcement
+level, pressure tactic, and social signal, and read the raw agent transcripts behind the
+numbers. Given the same rule, compliance ranges from 43.5% to 89.5% on the choice of model
+alone, a stated fine can lower compliance because it reads as a price, and a deadline gets
+past a built-in follow-the-law instruction for eleven of the twelve models.
+
+- **Paper:** https://arxiv.org/abs/2608.12323 (AAAI/ACM Conference on AI, Ethics, and Society 2026; also at the COLM 2026 Workshop on Agent Behavior)
+- **Live site:** https://trace-ai-labs.github.io/ai-incentives/
+- **Code and data:** https://github.com/trace-ai-labs/llm-compliance
+- **Follow-up benchmark:** [PACT](https://trace-ai-labs.github.io/pact/)
+
+`paper.pdf` is the arXiv build of the AIES camera-ready; copy it from `paper/main_arxiv.pdf`
+in the experiment repo whenever the paper changes. The site is a single dependency-free
+static page.
 
 ## Structure
 
