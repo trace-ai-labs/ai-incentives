@@ -707,7 +707,7 @@ function renderScatter(){
   const inside=b=> b.x>=padL-4 && b.x+b.w<=W-4 && b.y>=padT-2 && b.y+b.h<=padT+plotH+2;
   pts.forEach((p,i)=>{
     const col=MCOLOR[p.m]||"#6b7280";
-    const cx=dots[i].x, cy=dots[i].y, name=NAME(p.m), w=name.length*CH;
+    const cx=dots[i].x, cy=dots[i].y, name=narrow?String(i+1):NAME(p.m), w=name.length*CH+(narrow?2:0);
     const c=E("circle",{cx,cy,r:6.5,fill:col,opacity:.85,stroke:"#fff","stroke-width":1.5}); c.style.cursor="pointer";
     bindTip(c, ()=>`<div class="t-title">${name}</div>`
       +`<div class="t-row"><span>Drop when not a command</span><b>${p.fx.toFixed(0)}%</b></div>`
@@ -738,8 +738,9 @@ function renderScatter(){
     const ty = pick.b.y+LH-3;
     const far = Math.hypot((pick.b.x+w/2)-cx,(pick.b.y+LH/2)-cy) > 34;
     if(far) svg.appendChild(E("line",{x1:cx,y1:cy,x2:pick.b.x+w/2,y2:pick.b.y+LH/2,stroke:col,"stroke-width":.8,opacity:.4}));
-    svg.appendChild(txt(name,tx,ty,{fill:col,"text-anchor":pick.cd.anchor,style:(narrow?"font-size:11px;":"font-size:13px;")+"font-weight:600"}));
+    svg.appendChild(txt(name,tx,ty,{fill:col,"text-anchor":pick.cd.anchor,style:(narrow?"font-size:11px;":"font-size:13px;")+"font-weight:700"}));
   });
+  if(narrow) htmlLegend(el, pts.map((p,i)=>({key:p.m,label:`${i+1}  ${NAME(p.m)}`,col:MCOLOR[p.m]||"#6b7280"})));
   el.appendChild(svg);
 }
 
