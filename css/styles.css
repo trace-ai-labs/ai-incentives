@@ -216,7 +216,8 @@ svg.chart .gridline { stroke: var(--line); stroke-width:1; }
 svg.chart .axis { stroke: var(--line-2); stroke-width:1; }
 
 .svg-legend { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:12px; font-size:.8rem; color:var(--ink-2); }
-.svg-legend .lg { display:inline-flex; align-items:center; gap:6px; cursor:default; }
+.svg-legend .lg { display:inline-flex; align-items:center; gap:6px; cursor:pointer; padding:2px 6px; border-radius:6px; }
+.svg-legend .lg.held, .mt-models .mtm.held { background: var(--bg-alt); font-weight:600; }
 .svg-legend .lg i { width:9px; height:9px; border-radius:50%; display:inline-block; }
 
 /* tooltip */

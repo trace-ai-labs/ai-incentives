@@ -191,7 +191,8 @@ function htmlLegend(el, items, onFocus){
   items.forEach(it=>{
     const s=document.createElement("span"); s.className="lg";
     s.innerHTML=`<i style="background:${it.col}"></i>${it.label}`;
-    if(onFocus){ s.addEventListener("mouseenter",()=>onFocus(it.key)); s.addEventListener("mouseleave",()=>onFocus(null)); }
+    if(onFocus){ s.addEventListener("mouseenter",()=>onFocus(it.key)); s.addEventListener("mouseleave",()=>onFocus(box._held||null));
+      s.addEventListener("click",()=>{ box._held = (box._held===it.key)? null : it.key; onFocus(box._held); box.querySelectorAll(".lg").forEach(x=>x.classList.toggle("held", x===s && box._held===it.key)); }); }
     box.appendChild(s);
   });
   el.appendChild(box);
@@ -613,7 +614,7 @@ function renderMultiturn(){
   el.appendChild(svg);
 
   // side model list with hover sync
-  const list=$("#mt-models"); list.innerHTML='<div class="glabel">HOVER A MODEL</div>';
+  const list=$("#mt-models"); list.innerHTML='<div class="glabel">HOVER OR TAP A MODEL</div>'; let held=null;
   function focus(m){
     Object.keys(faint).forEach(k=> faint[k].forEach(p=> p.setAttribute("opacity", m===null?0:(k===m?.95:0))));
     svg.querySelectorAll(".mt-bold").forEach(b=> b.setAttribute("opacity", m===null?1:.3));
@@ -623,7 +624,8 @@ function renderMultiturn(){
     const row=document.createElement("div"); row.className="mtm";
     row.innerHTML=`<span class="sw" style="background:${MCOLOR[m]}"></span>${NAME(m)}`;
     row.addEventListener("mouseenter",()=>focus(m));
-    row.addEventListener("mouseleave",()=>{ focus(null); faint[m]&&faint[m].forEach(p=>p.setAttribute("stroke-width",1)); });
+    row.addEventListener("mouseleave",()=>{ if(held) { focus(held); return; } focus(null); faint[m]&&faint[m].forEach(p=>p.setAttribute("stroke-width",1)); });
+    row.addEventListener("click",()=>{ held = (held===m)? null : m; focus(held); list.querySelectorAll(".mtm").forEach(r=>r.classList.toggle("held", r===row && held===m)); });
     list.appendChild(row);
   });
 }
