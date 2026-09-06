@@ -135,8 +135,8 @@ function indexBy(rows, keys) { const m = new Map(); rows.forEach(r => m.set(keys
 const rate = r => (r && r.n ? 100*r.comp/r.n : null);
 
 /* ---------- color scale: red (violate) -> gold (mid) -> blue (comply) ---------- */
-const STOPS = [[0,[165,0,38]],[0.2,[244,109,67]],[0.38,[253,174,97]],[0.5,[255,210,90]],
-               [0.62,[145,191,219]],[0.8,[69,117,180]],[1,[39,57,140]]];
+const STOPS = [[0,[178,24,43]],[0.2,[214,96,77]],[0.38,[244,165,130]],[0.5,[247,230,205]],
+               [0.62,[146,197,222]],[0.8,[67,147,195]],[1,[33,102,172]]];
 function heatColor(pct){
   const t = Math.max(0, Math.min(1, pct/100));
   for (let i=0;i<STOPS.length-1;i++){ const [p0,c0]=STOPS[i],[p1,c1]=STOPS[i+1];
@@ -145,7 +145,10 @@ function heatColor(pct){
   return "rgb(39,57,140)";
 }
 // dark text over the light gold/orange band, white over deep red and deep blue
-const textOn = pct => { const t=pct/100; return (t<0.16||t>0.7) ? "#fff" : "#14171f"; };
+const textOn = pct => { const t=pct/100; return (t<0.24||t>0.74) ? "#fff" : "#14171f"; };
+// single-hue red ramp for "how much worse" bars: pale at 0, deep at 70+ points
+function dropColor(d){ const f=Math.max(0,Math.min(1,d/70)); const a=[251,208,189], b=[178,24,43];
+  return `rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*f)).join(",")})`; }
 
 /* ---------- tooltip ---------- */
 const tip = $("#tip");
@@ -193,7 +196,11 @@ function htmlLegend(el, items, onFocus){
   });
   el.appendChild(box);
 }
-function txt(s,x,y,a){ const t=E("text",Object.assign({x,y},a||{})); t.textContent=s; return t; }
+function txt(s,x,y,a){
+  a=Object.assign({},a||{}); let style=a.style||"";
+  for(const k of ["fill","font-size","font-weight"]){ if(a[k]!==undefined){ style+=`;${k}:${typeof a[k]==="number"&&k==="font-size"?a[k]+"px":a[k]}`; delete a[k]; } }
+  if(style) a.style=style.replace(/^;/,"");
+  const t=E("text",Object.assign({x,y},a)); t.textContent=s; return t; }
 
 /* ============================================================
    stat cards + footer
@@ -203,7 +210,7 @@ function renderStatCards(){
   const respK = Math.round(resp/1000);
   const cards = [
     {cls:"blue",  num:"12", lbl:"language models tested, from safety-tuned assistants to task-optimized agents."},
-    {cls:"blue",  num:`${respK}K`, lbl:`agent responses collected (${resp.toLocaleString()} in total) across every experiment.`},
+    {cls:"warn",  num:"46", unit:"pts", lbl:`spread in compliance across those models under the identical rule, from 43.5% to 89.5%.`},
     {cls:"amber", num:"≤45", unit:"%", lbl:"the best most models manage under a deadline, even when told to follow the law no matter what."},
   ];
   $("#stat-cards").innerHTML = cards.map(c =>
@@ -400,12 +407,21 @@ function renderParadox(){
     if(pts.length<2) return;
     const col=MCOLOR[m]||"#6b7280";   // color per model (there is no group to colour by)
     const path=E("path",{d:pts.map((p,i)=>(i?"L":"M")+p.x+" "+p.y).join(" "),fill:"none",stroke:col,
-      "stroke-width":2.2,"stroke-linejoin":"round","stroke-linecap":"round",opacity:0.5});
+      "stroke-width":1.6,"stroke-linejoin":"round","stroke-linecap":"round",opacity:0.38});
     svg.appendChild(path);
-    const dots=pts.map(p=>{ const c=E("circle",{cx:p.x,cy:p.y,r:3.5,fill:col,stroke:"#fff","stroke-width":1.4,opacity:0.6}); return c; });
+    const dots=pts.map(p=>{ const c=E("circle",{cx:p.x,cy:p.y,r:3,fill:col,stroke:"#fff","stroke-width":1.2,opacity:0.5}); return c; });
     dots.forEach(d=>svg.appendChild(d));
     lines.push({m,col,path,dots,lastY:pts[pts.length-1].y,pts});
   });
+  // mean across the selected models, drawn on top
+  const meanPts=FINS.map((f,i)=>{ const rs=[]; models.forEach(m=>{ const r=rate(idxControls.get([m,state.paradoxFraming,f].join("|"))); if(r!==null) rs.push(r); });
+    return rs.length?{x:xs[i],y:yOf(rs.reduce((a,b)=>a+b,0)/rs.length),v:rs.reduce((a,b)=>a+b,0)/rs.length,fin:f}:null; }).filter(Boolean);
+  if(meanPts.length>=2){
+    svg.appendChild(E("path",{d:meanPts.map((p,i)=>(i?"L":"M")+p.x+" "+p.y).join(" "),fill:"none",stroke:"#14171f","stroke-width":3.2,"stroke-linejoin":"round","stroke-linecap":"round",class:"mean-line"}));
+    meanPts.forEach(p=>{ const c=E("circle",{cx:p.x,cy:p.y,r:5,fill:"#14171f",stroke:"#fff","stroke-width":2,class:"mean-line"}); c.style.cursor="pointer";
+      bindTip(c, ()=>`<div class="t-title">Mean of ${models.length} models</div><div class="t-row"><span>${FIN_FULL[p.fin]}</span><b>${p.v.toFixed(0)}%</b></div>`); svg.appendChild(c); });
+    if(!narrow) svg.appendChild(txt("mean",meanPts[meanPts.length-1].x+8,meanPts[meanPts.length-1].y+4,{fill:"#14171f","font-size":12,"font-weight":700,class:"mean-line"}));
+  }
   const labs=lines.map(l=>({m:l.m,col:l.col,y:l.lastY})).sort((a,b)=>a.y-b.y);
   for(let i=1;i<labs.length;i++) if(labs[i].y-labs[i-1].y<14) labs[i].y=labs[i-1].y+14;
   const labelNodes={};
@@ -413,12 +429,13 @@ function renderParadox(){
 
   function focus(m){
     lines.forEach(l=>{
-      const on = (m===null||l.m===m);
-      l.path.setAttribute("opacity", on?0.95:0.06);
-      l.path.setAttribute("stroke-width", l.m===m?3.6:2.2);
-      l.dots.forEach(d=>d.setAttribute("opacity", on?0.95:0.06));
-      if(labelNodes[l.m]) labelNodes[l.m].setAttribute("opacity", on?1:0.1);
+      const on = (m===null) ? null : (l.m===m);
+      l.path.setAttribute("opacity", on===null?0.38:(on?1:0.06));
+      l.path.setAttribute("stroke-width", on?3.4:1.6);
+      l.dots.forEach(d=>d.setAttribute("opacity", on===null?0.5:(on?1:0.06)));
+      if(labelNodes[l.m]) labelNodes[l.m].setAttribute("opacity", on===null||on?1:0.15);
     });
+    svg.querySelectorAll(".mean-line").forEach(n=> n.setAttribute("opacity", m===null?1:0.25));
   }
   const showInfo=(m,e,pts)=>{ const near=pts.reduce((a,p)=>Math.abs(p.x-e.offsetX)<Math.abs(a.x-e.offsetX)?p:a,pts[0]);
     showTip(`<div class="t-title">${NAME(m)}</div><div class="t-row"><span>${FIN_FULL[near.fin]}</span><b>${near.v.toFixed(0)}%</b></div>`,e); };
@@ -434,7 +451,7 @@ function renderParadox(){
     if(lab){ lab.addEventListener("mouseenter",()=>focus(l.m)); lab.addEventListener("mouseleave",()=>focus(null)); }
   });
   el.appendChild(svg);
-  if(narrow) htmlLegend(el, lines.map(l=>({key:l.m,label:NAME(l.m),col:l.col})), focus);
+  if(narrow) htmlLegend(el, [{key:null,label:"Mean of all models",col:"#14171f"}].concat(lines.map(l=>({key:l.m,label:NAME(l.m),col:l.col}))), focus);
 }
 
 /* ============================================================
@@ -480,7 +497,7 @@ function renderRank(){
     svg.appendChild(E("rect",{x:padL,y,width:barW,height:rowH,rx:5,fill:"#f1f3f6"}));
     const w=barW*Math.max(0,d.drop)/100;
     // deeper red = bigger drop
-    const col=heatColor(Math.max(0,100-d.drop*1.1));
+    const col=dropColor(d.drop);
     const r=E("rect",{x:padL,y,width:Math.max(2,w),height:rowH,rx:5,fill:col});
     r.style.cursor="pointer"; bindTip(r,tipFn); svg.appendChild(r);
     svg.appendChild(txt(`−${d.drop.toFixed(0)}%`, padL+w+8, y+rowH/2+4,
@@ -581,7 +598,7 @@ function renderMultiturn(){
     models.forEach(m=>{
       const pts=agg.map((s,i)=> s.per[m]!==undefined?{x:xs[i],y:yOf(s.per[m])}:null).filter(Boolean);
       if(pts.length<2) return;
-      const p=E("path",{d:pts.map((q,i)=>(i?"L":"M")+q.x+" "+q.y).join(" "),fill:"none",stroke:col,"stroke-width":1,opacity:.13});
+      const p=E("path",{d:pts.map((q,i)=>(i?"L":"M")+q.x+" "+q.y).join(" "),fill:"none",stroke:col,"stroke-width":1,opacity:0});
       svg.appendChild(p); faint[m].push(p);
     });
     const apts=agg.map((s,i)=> s.avg!==null?{x:xs[i],y:yOf(s.avg),v:s.avg}:null).filter(Boolean);
@@ -596,10 +613,10 @@ function renderMultiturn(){
   el.appendChild(svg);
 
   // side model list with hover sync
-  const list=$("#mt-models"); list.innerHTML="";
+  const list=$("#mt-models"); list.innerHTML='<div class="glabel">HOVER A MODEL</div>';
   function focus(m){
-    Object.keys(faint).forEach(k=> faint[k].forEach(p=> p.setAttribute("opacity", m===null?.13:(k===m?.95:.04))));
-    svg.querySelectorAll(".mt-bold").forEach(b=> b.setAttribute("opacity", m===null?1:.25));
+    Object.keys(faint).forEach(k=> faint[k].forEach(p=> p.setAttribute("opacity", m===null?0:(k===m?.95:0))));
+    svg.querySelectorAll(".mt-bold").forEach(b=> b.setAttribute("opacity", m===null?1:.3));
     faint[m]&&faint[m].forEach(p=> p.setAttribute("stroke-width", m?2.2:1));
   }
   models.forEach(m=>{
@@ -616,7 +633,7 @@ function renderMultiturn(){
    ============================================================ */
 function renderReasoning(){
   const el=$("#bars-reason"); el.innerHTML="";
-  const segs=[{i:0,color:"#1f6fe5"},{i:1,color:"#9aa4b2"},{i:2,color:"#e23b4e"},{i:3,color:"#f59e0b"}];
+  const segs=[{i:0,color:"#2f6fbf"},{i:1,color:"#d2d8e0"},{i:2,color:"#c8323f"},{i:3,color:"#e0a63a"}];
   const dmap={}; D.reasoning.forEach(r=>dmap[r.m]=r);
   // A null regime means the model produced no violations to classify there
   // (Qwen under the anti-adversarial mandate); drop it rather than plot zeros.
@@ -651,7 +668,7 @@ function renderReasoning(){
       const names=["Names it, overrides","Mentions in passing","Silent","Cites policy"];
       bindTip(rect, ()=>`<div class="t-title">${row.label} · ${names[s.i]}</div><div class="t-row"><span>of violations</span><b>${Math.round(v)}%</b></div>`);
       svg.appendChild(rect);
-      if(w>22) svg.appendChild(txt(Math.round(v),x+w/2,y+rowH/2+4,{"text-anchor":"middle","font-size":10,fill: s.i===1?"#14171f":"#fff","font-weight":600}));
+      if(w>26) svg.appendChild(txt(Math.round(v),x+w/2,y+rowH/2+4,{"text-anchor":"middle","font-size":10.5,fill:(s.i===1||s.i===3)?"#14171f":"#fff","font-weight":600}));
       x+=w;
     });
     // silent annotation
