@@ -124,7 +124,7 @@ table.data th { color: var(--muted); font-weight: 600; font-size: .72rem; text-t
 table.data td.no  { color: var(--red-d); font-weight: 600; }
 table.data td.yes { color: var(--blue-d); font-weight: 600; }
 table.data tr.dom td { background: #fdf2f3; }
-.setup-tag { font-family: var(--mono); font-size:.68rem; letter-spacing:.08em; color: var(--indigo); text-transform: uppercase; font-weight:600; }
+.setup-tag { font-family: var(--mono); font-size:.68rem; letter-spacing:.08em; color: var(--indigo); text-transform: uppercase; font-weight:600; margin:0 0 6px; line-height:1.4; }
 .pill-row { display:flex; flex-wrap:wrap; gap:7px; margin-top:7px; }
 .pill { font-family:var(--mono); font-size:.74rem; padding:4px 10px; border-radius:999px; border:1px solid var(--line-2); color:var(--ink-2); background:#fff; }
 .grouplist .gl-label { display:inline-block; font-size:.78rem; font-weight:700; padding:3px 10px; border-radius:7px; margin:4px 0 6px; }
