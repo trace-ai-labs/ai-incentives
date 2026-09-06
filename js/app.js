@@ -174,6 +174,25 @@ const NS="http://www.w3.org/2000/svg";
 function E(tag,a){ const e=document.createElementNS(NS,tag); for(const k in a)e.setAttribute(k,a[k]); return e; }
 function newSvg(w,h){ const s=E("svg",{viewBox:`0 0 ${w} ${h}`,class:"chart"});
   s.style.width="100%"; s.style.maxWidth=w+"px"; s.style.height="auto"; return s; }
+// Charts are drawn at the container's width on phones so text stays legible
+// instead of the whole SVG being scaled down. `fallback` is the desktop width.
+function chartW(el, fallback){
+  const box = el.closest(".dash-body") || el.parentElement || el;
+  const cw = box.clientWidth ? box.clientWidth - 2 : 0;
+  return (cw && cw < 640) ? Math.max(300, cw) : fallback;
+}
+function isNarrow(el){ return chartW(el, 9999) < 640; }
+// Chip legend under a chart, used on phones in place of end-of-line labels.
+function htmlLegend(el, items, onFocus){
+  const box=document.createElement("div"); box.className="svg-legend";
+  items.forEach(it=>{
+    const s=document.createElement("span"); s.className="lg";
+    s.innerHTML=`<i style="background:${it.col}"></i>${it.label}`;
+    if(onFocus){ s.addEventListener("mouseenter",()=>onFocus(it.key)); s.addEventListener("mouseleave",()=>onFocus(null)); }
+    box.appendChild(s);
+  });
+  el.appendChild(box);
+}
 function txt(s,x,y,a){ const t=E("text",Object.assign({x,y},a||{})); t.textContent=s; return t; }
 
 /* ============================================================
@@ -361,12 +380,13 @@ function renderStakes(){
 function renderParadox(){
   const el=$("#line-paradox"); el.innerHTML="";
   const models=selModels();
-  const W=Math.max(620,150+96*FINS.length+150),H=400,padL=56,padR=152,padT=24,padB=60;
+  const narrow=isNarrow(el);
+  const W=chartW(el, Math.max(620,150+96*FINS.length+150)),H=narrow?320:400,padL=narrow?44:56,padR=narrow?18:152,padT=24,padB=narrow?52:60;
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const xs=FINS.map((_,i)=> padL+plotW*i/(FINS.length-1));
   const yOf=v=> padT+plotH*(1-v/100);
   const svg=newSvg(W,H);
-  const TICK="font-size:14px;fill:#5c6573", AX="font-size:15px;fill:#5c6573;font-weight:600";
+  const TICK=narrow?"font-size:12px;fill:#5c6573":"font-size:14px;fill:#5c6573", AX=narrow?"font-size:12px;fill:#5c6573;font-weight:600":"font-size:15px;fill:#5c6573;font-weight:600";
   [0,25,50,75,100].forEach(v=>{ svg.appendChild(E("line",{x1:padL,y1:yOf(v),x2:padL+plotW,y2:yOf(v),class:"gridline"}));
     svg.appendChild(txt(v,padL-10,yOf(v)+5,{"text-anchor":"end",style:TICK})); });
   FINS.forEach((f,i)=> svg.appendChild(txt(FIN_SHORT[f],xs[i],H-padB+26,{"text-anchor":"middle",style:TICK})));
@@ -389,7 +409,7 @@ function renderParadox(){
   const labs=lines.map(l=>({m:l.m,col:l.col,y:l.lastY})).sort((a,b)=>a.y-b.y);
   for(let i=1;i<labs.length;i++) if(labs[i].y-labs[i-1].y<14) labs[i].y=labs[i-1].y+14;
   const labelNodes={};
-  labs.forEach(l=>{ const t=txt(NAME(l.m),padL+plotW+10,l.y+4,{fill:l.col,style:"font-size:13px;font-weight:600;cursor:pointer"}); labelNodes[l.m]=t; svg.appendChild(t); });
+  if(!narrow) labs.forEach(l=>{ const t=txt(NAME(l.m),padL+plotW+10,l.y+4,{fill:l.col,style:"font-size:13px;font-weight:600;cursor:pointer"}); labelNodes[l.m]=t; svg.appendChild(t); });
 
   function focus(m){
     lines.forEach(l=>{
@@ -414,6 +434,7 @@ function renderParadox(){
     if(lab){ lab.addEventListener("mouseenter",()=>focus(l.m)); lab.addEventListener("mouseleave",()=>focus(null)); }
   });
   el.appendChild(svg);
+  if(narrow) htmlLegend(el, lines.map(l=>({key:l.m,label:NAME(l.m),col:l.col})), focus);
 }
 
 /* ============================================================
@@ -437,8 +458,9 @@ function renderRank(){
     const pct=agg(p); if(pct===null||base===null) return null;
     return {p, pct, drop: base-pct};
   }).filter(Boolean).sort((a,b)=>b.drop-a.drop);   // biggest drop (most effective) first
-  const rowH=28,gap=9,padL=180,padR=58,padT=14;
-  const barW=420;
+  const narrow=isNarrow(el);
+  const rowH=narrow?24:28,gap=narrow?8:9,padL=narrow?152:180,padR=narrow?44:58,padT=14;
+  const barW=narrow? Math.max(120, chartW(el,0)-padL-padR) : 420;
   const W=padL+barW+padR, H=padT+10+data.length*(rowH+gap);
   const xOf=v=> padL+barW*v/100;
   const svg=newSvg(W,H);
@@ -453,7 +475,7 @@ function renderRank(){
       +(DESC.pressure[d.p].p?`<div class="t-prompt">“${DESC.pressure[d.p].p}”</div>`:"")
       +`<div class="t-row"><span>Drops compliance by</span><b>${d.drop.toFixed(0)}%</b></div>`
       +`<div class="t-row"><span>${statWord} left</span><b>${remain.toFixed(0)}%</b></div>`;
-    const label=txt(PRESSURE_FULL[d.p],padL-12,y+rowH/2+4,{"text-anchor":"end","font-size":12.5,fill:"#14171f","font-weight":600});
+    const label=txt(PRESSURE_FULL[d.p],padL-10,y+rowH/2+4,{"text-anchor":"end","font-size":narrow?10.5:12.5,fill:"#14171f","font-weight":600});
     label.style.cursor="help"; bindTip(label,tipFn); svg.appendChild(label);
     svg.appendChild(E("rect",{x:padL,y,width:barW,height:rowH,rx:5,fill:"#f1f3f6"}));
     const w=barW*Math.max(0,d.drop)/100;
@@ -485,7 +507,8 @@ function renderEffect(){
   $("#effect-legend").innerHTML = order.map(s=>`<span><span class="swatch" style="background:${colors[s]}"></span>${labels[s]}</span>`).join("");
 
   const models=selModels();
-  const W=Math.max(640,720),H=380,padL=52,padR=140,padT=22,padB=54;
+  const narrow=isNarrow(el);
+  const W=chartW(el, Math.max(640,720)),H=narrow?300:380,padL=narrow?44:52,padR=narrow?16:140,padT=22,padB=54;
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const xs=FINS.map((_,i)=> padL+plotW*i/(FINS.length-1));
   const yOf=v=> padT+plotH*(1-v/100);
@@ -514,7 +537,7 @@ function renderEffect(){
   });
   labs.sort((a,b)=>a.y-b.y);
   for(let i=1;i<labs.length;i++) if(labs[i].y-labs[i-1].y<13) labs[i].y=labs[i-1].y+13;
-  labs.forEach(l=> svg.appendChild(txt(l.label,padL+plotW+10,l.y+4,{fill:l.col,"font-size":12,"font-weight":700})));
+  if(!narrow) labs.forEach(l=> svg.appendChild(txt(l.label,padL+plotW+10,l.y+4,{fill:l.col,"font-size":12,"font-weight":700})));
   el.appendChild(svg);
 }
 
@@ -538,7 +561,8 @@ function mtAgg(direction){
 }
 function renderMultiturn(){
   const el=$("#line-mt"); el.innerHTML="";
-  const W=Math.max(560,640),H=380,padL=52,padR=120,padT=22,padB=54;
+  const narrow=isNarrow(el);
+  const W=chartW(el, Math.max(560,640)),H=narrow?300:380,padL=narrow?44:52,padR=narrow?74:120,padT=22,padB=54;
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const xs=[0,1,2].map(i=> padL+plotW*i/2);
   const yOf=v=> padT+plotH*(1-v/100);
@@ -606,14 +630,16 @@ function renderReasoning(){
   const mean=[0,1,2,3].map(i=> models.length? models.reduce((s,m)=>s+valOf(m)[i],0)/models.length : 0);
   const rows=[{m:"__mean__", agg:true, vals:mean, label:`All ${models.length} selected (mean)`}]
     .concat(models.map(m=>({m, vals:valOf(m), label:NAME(m)})));
-  const rowH=26,gap=11,padL=176,padR=84,padT=6,padB=6,barW=520;
+  const narrow=isNarrow(el);
+  const rowH=narrow?22:26,gap=narrow?9:11,padL=narrow?118:176,padR=narrow?64:84,padT=6,padB=6;
+  const barW=narrow? Math.max(120, chartW(el,0)-padL-padR) : 520;
   const W=padL+barW+padR, H=padT+padB+rows.length*(rowH+gap)+8;
   const svg=newSvg(W,H);
   rows.forEach((row,ri)=>{
     const m=row.m;
     const y=padT+ri*(rowH+gap)+(row.agg?0:8);
     if(ri===1) svg.appendChild(E("line",{x1:padL-160,y1:y-5,x2:padL+barW,y2:y-5,stroke:"#d4d9e0","stroke-width":1}));
-    svg.appendChild(txt(row.label,padL-12,y+rowH/2+4,{"text-anchor":"end","font-size":row.agg?12.5:12,
+    svg.appendChild(txt(narrow&&row.agg?`Mean (${models.length})`:row.label,padL-10,y+rowH/2+4,{"text-anchor":"end","font-size":narrow?(row.agg?11:10.5):(row.agg?12.5:12),
       fill:"#14171f","font-weight":row.agg?700:600}));
     const vals=row.vals;
     const total=vals.reduce((a,b)=>a+b,0)||100;
@@ -629,7 +655,7 @@ function renderReasoning(){
       x+=w;
     });
     // silent annotation
-    const sv=Math.round(vals[2]); if(sv) svg.appendChild(txt(`${sv}% silent`,padL+barW+8,y+rowH/2+4,{"font-size":11,fill:"#c01f33","font-weight":700}));
+    const sv=Math.round(vals[2]); if(sv) svg.appendChild(txt(`${sv}% silent`,padL+barW+8,y+rowH/2+4,{"font-size":narrow?10:11,fill:"#c01f33","font-weight":700}));
   });
   el.appendChild(svg);
 }
@@ -639,7 +665,8 @@ function renderReasoning(){
    ============================================================ */
 function renderScatter(){
   const el=$("#scatter-fragility"); el.innerHTML="";
-  const W=760,H=460,padL=62,padR=30,padT=28,padB=56;
+  const narrow=isNarrow(el);
+  const W=chartW(el,760),H=narrow?Math.round(W*0.95):460,padL=narrow?46:62,padR=narrow?14:30,padT=28,padB=narrow?50:56;
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const pts=[];
   ORDER.filter(m=>state.models.has(m)).forEach(m=>{
@@ -656,22 +683,26 @@ function renderScatter(){
   svg.appendChild(E("rect",{x:padL,y:padT,width:plotW,height:plotH,fill:"#fbfcfd"}));
   svg.appendChild(E("rect",{x:padL,y:midy,width:midx-padL,height:padT+plotH-midy,fill:"rgba(31,111,229,.06)"}));
   svg.appendChild(E("rect",{x:midx,y:padT,width:padL+plotW-midx,height:midy-padT,fill:"rgba(226,59,78,.06)"}));
-  const TICK="font-size:13px;fill:#8a92a0", AX="font-size:15px;fill:#5c6573;font-weight:600";
+  const TICK=narrow?"font-size:10.5px;fill:#8a92a0":"font-size:13px;fill:#8a92a0", AX=narrow?"font-size:11.5px;fill:#5c6573;font-weight:600":"font-size:15px;fill:#5c6573;font-weight:600";
   [0,25,50,75,100].forEach(v=>{ svg.appendChild(E("line",{x1:xOf(v),y1:padT,x2:xOf(v),y2:padT+plotH,class:"gridline"}));
     svg.appendChild(E("line",{x1:padL,y1:yOf(v),x2:padL+plotW,y2:yOf(v),class:"gridline"}));
     svg.appendChild(txt(v,xOf(v),H-padB+20,{"text-anchor":"middle",style:TICK}));
     svg.appendChild(txt(v,padL-9,yOf(v)+5,{"text-anchor":"end",style:TICK})); });
   svg.appendChild(txt("breaks when the rule isn't a command →",padL+plotW/2,H-12,{"text-anchor":"middle",style:AX}));
-  svg.appendChild(txt("breaks when a small fine appears →",18,padT+plotH/2,{"text-anchor":"middle",style:AX,transform:`rotate(-90 18 ${padT+plotH/2})`}));
-  svg.appendChild(txt("ROBUST",xOf(2),yOf(3),{style:"font-size:14px;font-weight:700;fill:#1f6fe5"}));
-  svg.appendChild(txt("FRAGILE",xOf(98),yOf(97),{"text-anchor":"end",style:"font-size:14px;font-weight:700;fill:#c01f33"}));
+  const yx=narrow?11:18;
+  svg.appendChild(txt("breaks when a small fine appears →",yx,padT+plotH/2,{"text-anchor":"middle",style:AX,transform:`rotate(-90 ${yx} ${padT+plotH/2})`}));
+  const QS=narrow?"font-size:11px;font-weight:700;":"font-size:14px;font-weight:700;";
+  const qfs=narrow?11:14;
+  svg.appendChild(txt("ROBUST",xOf(2),yOf(37),{style:QS+"fill:#1f6fe5"}));
+  svg.appendChild(txt("FRAGILE",xOf(98),yOf(97),{"text-anchor":"end",style:QS+"fill:#c01f33"}));
+  const captionBoxes=[{x:xOf(2),y:yOf(37)-qfs,w:6.6*qfs*0.6*1.1+6*qfs*0.1,h:qfs+2},{x:xOf(98)-7*qfs*0.62,y:yOf(97)-qfs,w:7*qfs*0.62,h:qfs+2}];
 
   // label placement: try right, left, above, below of each dot (then farther
   // offsets), keep the first spot that overlaps neither another label nor a dot,
   // and keep every label inside the plot so the bottom row is not clipped.
-  const CH=7.2, LH=14;
+  const CH=narrow?6.3:7.2, LH=narrow?13:14;
   const dots=pts.map(p=>({x:xOf(p.fx),y:yOf(p.fy)}));
-  const boxes=[];
+  const boxes=captionBoxes.slice();
   const hit=(a,b)=> a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y;
   const inside=b=> b.x>=padL-4 && b.x+b.w<=W-4 && b.y>=padT-2 && b.y+b.h<=padT+plotH+2;
   pts.forEach((p,i)=>{
@@ -683,11 +714,15 @@ function renderScatter(){
       +`<div class="t-row"><span>Drop when a fine appears</span><b>${p.fy.toFixed(0)}%</b></div>`);
     svg.appendChild(c);
     const cands=[];
-    [10,26,42].forEach(d=>{
+    [10,26,42,58,78,100].forEach(d=>{
       cands.push({x:cx+d, y:cy-LH/2, anchor:"start"});
       cands.push({x:cx-d-w, y:cy-LH/2, anchor:"end"});
       cands.push({x:cx-w/2, y:cy-d-LH+4, anchor:"middle"});
       cands.push({x:cx-w/2, y:cy+d-4, anchor:"middle"});
+      cands.push({x:cx+d*0.7, y:cy-d*0.7-LH, anchor:"start"});
+      cands.push({x:cx-d*0.7-w, y:cy-d*0.7-LH, anchor:"end"});
+      cands.push({x:cx+d*0.7, y:cy+d*0.7, anchor:"start"});
+      cands.push({x:cx-d*0.7-w, y:cy+d*0.7, anchor:"end"});
     });
     let pick=null;
     for(const cd of cands){
@@ -701,9 +736,9 @@ function renderScatter(){
     boxes.push(pick.b);
     const tx = pick.cd.anchor==="start"? pick.b.x : pick.cd.anchor==="end"? pick.b.x+w : pick.b.x+w/2;
     const ty = pick.b.y+LH-3;
-    const far = Math.hypot((pick.b.x+w/2)-cx,(pick.b.y+LH/2)-cy) > 40;
+    const far = Math.hypot((pick.b.x+w/2)-cx,(pick.b.y+LH/2)-cy) > 34;
     if(far) svg.appendChild(E("line",{x1:cx,y1:cy,x2:pick.b.x+w/2,y2:pick.b.y+LH/2,stroke:col,"stroke-width":.8,opacity:.4}));
-    svg.appendChild(txt(name,tx,ty,{fill:col,"text-anchor":pick.cd.anchor,style:"font-size:13px;font-weight:600"}));
+    svg.appendChild(txt(name,tx,ty,{fill:col,"text-anchor":pick.cd.anchor,style:(narrow?"font-size:11px;":"font-size:13px;")+"font-weight:600"}));
   });
   el.appendChild(svg);
 }
@@ -804,6 +839,9 @@ function init(){
   register(renderPressure); register(renderRank); register(renderEffect);
   register(renderMultiturn); register(renderReasoning);
   rerenderAll(); setupExplorer();
+  let rt=null, lastW=window.innerWidth;
+  window.addEventListener("resize", ()=>{ if(Math.abs(window.innerWidth-lastW)<24) return; lastW=window.innerWidth;
+    clearTimeout(rt); rt=setTimeout(rerenderAll, 150); });
 }
 document.addEventListener("DOMContentLoaded", init);
 })();

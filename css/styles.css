@@ -66,7 +66,12 @@ nav.top .navdot { width: 11px; height: 11px; border-radius: 50%;
 nav.top .links { display: flex; gap: 18px; margin: 0 auto; flex-wrap: wrap; }
 nav.top .links a { color: var(--muted); font-size: .83rem; font-weight: 500; }
 nav.top .links a:hover { color: var(--ink); }
-@media (max-width: 940px){ nav.top .links { display:none; } }
+@media (max-width: 940px){
+  nav.top .wrap { gap: 12px; }
+  nav.top .links { margin: 0; gap: 16px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 4px 0; }
+  nav.top .links::-webkit-scrollbar { display: none; }
+  nav.top .links a { white-space: nowrap; }
+}
 
 /* ---------- hero ---------- */
 header.hero { padding: 84px 0 44px; text-align: center; }
@@ -180,7 +185,8 @@ table.data tr.dom td { background: #fdf2f3; }
 .heat th.brk.II .brk-txt { color: var(--violet); }
 .heat th.grp { font-size:.72rem; font-weight:700; color:var(--ink-2); padding:0 4px 5px; text-align:center; letter-spacing:.02em; border-bottom:2px solid var(--line-2); }
 .heat th.col { width:48px; min-width:48px; max-width:48px; font-size:.69rem; color:var(--muted); font-weight:600; padding:6px 2px 8px; text-align:center; line-height:1.15; }
-.heat th.rowh { text-align:right; padding-right:11px; font-size:.84rem; font-weight:600; color:var(--ink); white-space:nowrap; width:122px; }
+.heat th.rowh { text-align:right; padding-right:11px; font-size:.84rem; font-weight:600; color:var(--ink); white-space:nowrap; width:122px;
+  position: sticky; left: 0; z-index: 2; background: #fff; }
 .heat td.cell { width:48px; min-width:48px; max-width:48px; height:36px; text-align:center; border-radius:6px;
   border:1px solid rgba(20,23,31,.07); font-family:var(--mono); font-size:.8rem; font-weight:600; cursor:default; transition: transform .1s; }
 .heat td.cell:hover { transform: scale(1.09); outline:2px solid var(--ink); z-index:2; position:relative; }
@@ -208,6 +214,10 @@ svg.chart text { fill: var(--muted); font-size: 11px; }
 svg.chart .axislbl { fill: var(--muted-2); font-size: 10.5px; font-family: var(--mono); }
 svg.chart .gridline { stroke: var(--line); stroke-width:1; }
 svg.chart .axis { stroke: var(--line-2); stroke-width:1; }
+
+.svg-legend { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:12px; font-size:.8rem; color:var(--ink-2); }
+.svg-legend .lg { display:inline-flex; align-items:center; gap:6px; cursor:default; }
+.svg-legend .lg i { width:9px; height:9px; border-radius:50%; display:inline-block; }
 
 /* tooltip */
 #tip { position: fixed; z-index: 300; pointer-events:none; opacity:0; transition: opacity .1s;
@@ -309,9 +319,18 @@ footer a { font-weight:600; }
   .seg button { flex: 1 1 0; padding: 8px 6px; }
   .dash-body { padding: 16px 14px; }
 
-  /* charts: scroll horizontally at a legible size rather than shrinking text */
+  /* charts are drawn at container width on phones (see chartW in app.js) */
   .chartwrap { text-align: left; -webkit-overflow-scrolling: touch; }
-  .chartwrap svg.chart { min-width: 460px; }
+  .hero .lede, .hero .venue { text-align: left; }
+  .hero .authors { font-size: .92rem; }
+  .stat .num { font-size: 2rem; }
+  .heat-wrap::before { content: "Swipe sideways to see every column"; font-size: .74rem; color: var(--muted-2); font-family: var(--mono); letter-spacing: .04em; }
+  .heat th.col { width: 44px; min-width: 44px; max-width: 44px; }
+  .heat td.cell { width: 44px; min-width: 44px; max-width: 44px; height: 32px; font-size: .76rem; }
+  .heat th.rowh { width: 108px; font-size: .78rem; padding-right: 8px; }
+  footer .wrap { flex-wrap: wrap; gap: 10px 22px; }
+  .callout .ico { display: none; }
+  section h2 { font-size: 1.55rem; }
 
   /* heatmaps already scroll; nudge the legend below instead of beside */
   .heat-wrap { flex-direction: column; gap: 8px; }
@@ -335,7 +354,6 @@ footer a { font-weight:600; }
 
 @media (max-width: 420px){
   .seg button { font-size: .78rem; }
-  .chartwrap svg.chart { min-width: 380px; }
 }
 
 /* venue line under the hero authors, and the BibTeX block */
