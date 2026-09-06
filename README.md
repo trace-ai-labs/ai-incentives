@@ -1,6 +1,6 @@
-# The Compliance Architecture of AI Agents — project website
+# What Makes AI Agents Follow the Rules? (AIES 2026) - project website
 
-Interactive companion site for the paper *"Why Do AI Agents Break Rules? How Framing,
+Interactive results site for our AIES 2026 study of AI agent compliance, the paper *"Why Do AI Agents Break Rules? How Framing,
 Context, and Social Signals Shape Compliance"* (AIES 2026; COLM 2026 Workshop on Agent
 Behavior). `paper.pdf` is the arXiv build of the AIES camera-ready -- copy it from
 `paper/main_arxiv.pdf` in the experiment repo whenever the paper changes.

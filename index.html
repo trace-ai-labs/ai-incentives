@@ -75,7 +75,8 @@
     <p class="lede">
       We give an AI procurement agent one legal rule, then add the ordinary pressures of a workplace:
       fines, deadlines, managers, and what other teams did. Whether the agent obeys turns out to depend less
-      on the rule than on how it is phrased and the situation around it.
+      on the rule than on how it is phrased and the situation around it. This is a study of AI agent
+      compliance: what makes an LLM agent keep a rule it has been given, and what makes it break one.
     </p>
     <p class="authors">
       <a href="https://mika-okamoto.github.io" target="_blank" rel="noopener">Mika Okamoto</a>
@@ -102,7 +103,7 @@
 <section id="setup" class="alt">
   <div class="wrap">
     <div class="head">
-      <h2>The test</h2>
+      <h2>The compliance test</h2>
       <p>
         The agent works in a company chat and is told to keep costs down. Its instructions add a rule: purchases
         over $1k must use an environmentally certified vendor. We then ask it to pick a vendor from a short list.
@@ -189,7 +190,7 @@
 <section id="pressure">
   <div class="wrap">
     <div class="head">
-      <h2>How pressure from the user breaks the rule</h2>
+      <h2>How pressure from the user breaks AI agent compliance</h2>
       <p>
         With the rule fixed, the employee pushes in nine ways, from a soft budget hint to a flat order to ignore it.
         A built-in instruction to follow the law regardless ("anti-adversarial") helps, but one tactic gets past it.
