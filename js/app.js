@@ -294,7 +294,7 @@ function dotStrip(el, rows, o) {
       const hit = S("rect", { x: 0, y: yc - rowH / 2, width: W, height: rowH, class: o.sel === row.key ? "rowsel" : "rowhit" }, svg);
       hit.addEventListener("click", () => o.onRow(row.key));
     }
-    const lab = T(svg, LW, yc + 4, row.label, "rowlab" + (row.strong || o.sel === row.key ? " strong" : ""), { "text-anchor": "end" });
+    const lab = T(svg, LW, yc + 4, narrow && row.short ? row.short : row.label, "rowlab" + (row.strong || o.sel === row.key ? " strong" : ""), { "text-anchor": "end" });
     if (row.tip) { lab.style.cursor = "help"; bindTip(lab, () => row.tip); }
     if (o.onRow) { lab.style.cursor = "pointer"; lab.addEventListener("click", () => o.onRow(row.key)); }
     const pts = ORDER.filter(m => pct(row.per[m]) !== null).map(m => ({ m: m, v: pct(row.per[m]), x: X(pct(row.per[m])) }));
@@ -434,7 +434,7 @@ function tintTable(el, cols, o) {
     const col = cols.find(c => c.key === st.key);
     if (col) models.sort((a, b) => st.dir * ((pct(col.per[a]) ?? -1) - (pct(col.per[b]) ?? -1)));
   }
-  let h = '<table class="tint"><thead><tr><th class="l">Model</th>';
+  let h = '<table class="tint" style="min-width:' + (150 + cols.length * 58) + 'px"><colgroup><col class="cname">' + cols.map(() => "<col>").join("") + '</colgroup><thead><tr><th class="l">Model</th>';
   cols.forEach(c => { h += '<th class="sortable' + (st.key === c.key ? " sorted" : "") + '" data-k="' + c.key + '"><span class="' + (c.tip ? "hint" : "") + '" data-tipk="' + c.key + '">' + c.label + "</span></th>"; });
   h += "</tr></thead><tbody>";
   models.forEach(m => {
@@ -817,16 +817,18 @@ function ctrlBubble(sys) {
   return '<div class="bub ' + (sys ? "sys" : "user") + '"><div class="who"><span class="av">' + (sys ? "S" : "E") + "</span>Control</div>" +
     (sys ? "Persona plus the informational regulation, nothing else added." : "The plain purchase request, nothing added.") + "</div>";
 }
+// every full-width condition chart shares one label column so the plots line up
+const stripLW = el => (widthOf(el) < 520 ? 140 : 210);
 function renderBattery() {
   const C = k => cell(D.controls, k);
   // overall = pooled runs over the twelve framing x fine cells (no-regulation baseline excluded), as in section 4.1
   const overall = {}; ORDER.forEach(m => { overall[m] = { n: 0, c: 0 }; });
   D.controls.forEach(r => { if (r.framing !== "none" && overall[r.m]) { overall[r.m].n += r.n; overall[r.m].c += r.comp; } });
   tintTable($("#battery"), [
-    { key: "dn", label: "Imp. /<br>No Fine", per: C({ framing: "directive", fin: "none" }), tip: "Compliance ceiling: does the model follow the rule when it is stated as a command, with nothing else in the prompt?" },
-    { key: "dl", label: "Imp. /<br>Small Fine", per: C({ framing: "directive", fin: "low" }), tip: "Penalty paradox: does adding a small, unlikely fine to the imperative rule lower compliance?" },
-    { key: "in", label: "Info. /<br>No Fine", per: C({ framing: "informational", fin: "none" }), tip: "Framing dependence: does the model follow the rule when it is stated as information instead of a command?" },
-    { key: "oh", label: "Discret. /<br>Large Fine", per: C({ framing: "discretionary", fin: "high" }), tip: "Discretion tolerance: does the model comply when told it may use any vendor, but the fine is large and an audit is likely?" },
+    { key: "dn", label: "Imp.<br>No Fine", per: C({ framing: "directive", fin: "none" }), tip: "Compliance ceiling: does the model follow the rule when it is stated as a command, with nothing else in the prompt?" },
+    { key: "dl", label: "Imp.<br>Small Fine", per: C({ framing: "directive", fin: "low" }), tip: "Penalty paradox: does adding a small, unlikely fine to the imperative rule lower compliance?" },
+    { key: "in", label: "Info.<br>No Fine", per: C({ framing: "informational", fin: "none" }), tip: "Framing dependence: does the model follow the rule when it is stated as information instead of a command?" },
+    { key: "oh", label: "Discret.<br>Large Fine", per: C({ framing: "discretionary", fin: "high" }), tip: "Discretion tolerance: does the model comply when told it may use any vendor, but the fine is large and an audit is likely?" },
     { key: "all", label: "Overall", per: overall, tip: "Overall: compliance over all runs in the three framings and four fine levels. This gives the 43.5% to 89.5% range in the paper." }
   ]);
 }
@@ -841,33 +843,33 @@ function wordSentence(v, verb) {
     : "state environmental reg now " + verb + " purchases over $1k to use ISO 14001 certified vendors";
 }
 function renderWording() {
-  dotStrip($("#leg-wording"), WORDING.map(w => ({ key: w[0], label: '"' + w[1] + '" (' + WORD_GROUP[w[0]] + ")",
+  dotStrip($("#leg-wording"), WORDING.map(w => ({ key: w[0], label: '"' + w[1] + '" (' + WORD_GROUP[w[0]] + ")", short: '"' + w[1] + '"',
     tip: "Exact rule text: \"" + esc(wordSentence(w[0], w[1])) + (RS.wFine === "none" ? "." : ". Enforcement is via random audit...") + "\" The paper groups this verb as " + WORD_GROUP[w[0]] + ".", per: cell(D.wording, { variant: w[0], fin: RS.wFine }) })),
-    { labelW: widthOf($("#leg-wording")) < 520 ? 150 : 200 });
+    { labelW: stripLW($("#leg-wording")) });
 }
 function renderAuthority() {
   const A = [["none", "Control"], ["mgr_authorize", "Manager authorization"], ["board_cost", "Board cost policy"]];
   dotStrip($("#leg-auth"), A.map(a => ({ key: a[0], label: a[1], strong: a[0] === "none", tip: GLOSS[a[0] === "none" ? "control" : a[0]], per: cell(D.authority, { authority: a[0], fin: RS.aFine }) })),
-    { sel: RS.aSel, onRow: k => { RS.aSel = k; renderAuthority(); }, labelW: widthOf($("#leg-auth")) < 520 ? 140 : 190 });
+    { sel: RS.aSel, onRow: k => { RS.aSel = k; renderAuthority(); }, labelW: stripLW($("#leg-auth")) });
   $("#leg-msg").innerHTML = RS.aSel === "none" ? ctrlBubble(true) : msgBubble(CTXK[RS.aSel]);
 }
 function renderSocial() {
   const R = [["none", "Control"], ["peer_fined", "Peer fined"], ["peer_compliant", "Peer compliant"], ["peer_escaped", "Peer escaped"]];
   dotStrip($("#soc-chart"), R.map(r => ({ key: r[0], label: r[1], strong: r[0] === "none", tip: GLOSS[r[0] === "none" ? "control" : r[0]], per: cell(D.social, { social: r[0], fin: RS.sFine }) })),
-    { sel: RS.sSel, onRow: k => { RS.sSel = k; renderSocial(); }, labelW: widthOf($("#soc-chart")) < 520 ? 120 : 170 });
+    { sel: RS.sSel, onRow: k => { RS.sSel = k; renderSocial(); }, labelW: stripLW($("#soc-chart")) });
   $("#soc-msg").innerHTML = RS.sSel === "none" ? ctrlBubble(false) : msgBubble(CTXK[RS.sSel]);
 }
 function renderNorms() {
   const R = [["none", "Control (regulation only)"], ["community", "Community activism"], ["media", "Media coverage"], ["industry", "Industry standard"]];
-  dotStrip($("#exp-chart"), R.map(r => ({ key: r[0], label: r[1], strong: r[0] === "none", tip: GLOSS[r[0] === "none" ? "control" : r[0]], per: cell(D.norm, { norm: r[0], fin: RS.eFine }) })),
-    { sel: RS.eSel, onRow: k => { RS.eSel = k; renderNorms(); }, labelW: widthOf($("#exp-chart")) < 520 ? 140 : 200 });
+  dotStrip($("#exp-chart"), R.map(r => ({ key: r[0], label: r[1], short: r[0] === "none" ? "Control" : undefined, strong: r[0] === "none", tip: GLOSS[r[0] === "none" ? "control" : r[0]], per: cell(D.norm, { norm: r[0], fin: RS.eFine }) })),
+    { sel: RS.eSel, onRow: k => { RS.eSel = k; renderNorms(); }, labelW: stripLW($("#exp-chart")) });
   $("#exp-msg").innerHTML = RS.eSel === "none" ? ctrlBubble(true) : msgBubble(CTXK[RS.eSel]);
 }
 function prCell(k) { return cell(D.pressure, { pressure: k, mandate: RS.prMandate, fin: RS.prFine }); }
 function renderPressure() {
   const rows = [{ key: "none", label: "Control (no pressure)", per: prCell("none"), strong: true, tip: GLOSS.control }].concat(PRESS.map(c => ({ key: c.k, label: c.label, tip: GLOSS[c.k], per: prCell(PKEY(c)) })));
   const ctrl = rows[0], rest = rows.slice(1).sort((a, b) => pooled(b.per) - pooled(a.per));
-  dotStrip($("#pr-chart"), [ctrl].concat(rest), { sel: RS.prSel, onRow: k => { RS.prSel = k; renderPressure(); }, labelW: widthOf($("#pr-chart")) < 520 ? 140 : 200 });
+  dotStrip($("#pr-chart"), [ctrl].concat(rest), { sel: RS.prSel, onRow: k => { RS.prSel = k; renderPressure(); }, labelW: stripLW($("#pr-chart")) });
   $("#pr-msg").innerHTML = RS.prSel === "none" ? ctrlBubble(false) : msgBubble(CTXK[RS.prSel]);
   const urg = prCell("urgency");
   const ranked = ORDER.filter(m => pct(urg[m]) !== null).sort((a, b) => pct(urg[b]) - pct(urg[a]));
@@ -1093,7 +1095,10 @@ window.addEventListener("hashchange", route);
     else { const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) {} document.body.removeChild(ta); done(); }
   }
   $("#copybib").addEventListener("click", function () { copy(this, "Copy"); });
-  document.querySelectorAll("[data-copybib]").forEach(b => b.addEventListener("click", () => copy(b, "Bibtex")));
+  // the Bibtex buttons scroll to the citation block in the footer
+  document.querySelectorAll("[data-copybib]").forEach(b => b.addEventListener("click", () => {
+    const el = $(".bibwrap"); if (el) el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
+  }));
 })();
 
 // redraw charts when the width changes

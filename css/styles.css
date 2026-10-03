@@ -350,7 +350,8 @@ section > .wrap > h2 { font-size: 24px; letter-spacing: -0.015em; margin-bottom:
 
 /* ---------- charts ---------- */
 .figrow { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 8px; }
-@media (max-width: 960px) { .figrow { grid-template-columns: 1fr; } }
+#r-models .figrow { grid-template-columns: 1.2fr 1fr; }
+@media (max-width: 960px) { .figrow, #r-models .figrow { grid-template-columns: 1fr; } }
 figure.viz { border: 1px solid var(--hairline); background: var(--surface); padding: 20px 22px 16px; min-width: 0; }
 .stack { display: grid; gap: 24px; }
 figure.viz figcaption { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
@@ -407,16 +408,18 @@ svg.hasfocus .d { fill-opacity: 0.2; }
 
 /* tinted tables */
 .tablewrap { overflow-x: auto; }
-table.tint { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.tint { border-collapse: collapse; width: 100%; font-size: 13px; table-layout: fixed; }
+table.tint col.cname { width: 150px; }
 table.tint th {
   font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; color: var(--muted);
-  text-align: center; padding: 8px 6px; border-bottom: 1px solid var(--hairline-strong); vertical-align: bottom; line-height: 1.3;
+  text-align: center; padding: 6px 4px; height: 46px; border-bottom: 1px solid var(--hairline-strong); vertical-align: bottom; line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 table.tint th.l { text-align: left; }
 table.tint th.sortable { cursor: pointer; }
 table.tint th.sortable:hover, table.tint th.sorted { color: var(--accent-ink); }
-table.tint td { padding: 6px 6px; text-align: center; border-bottom: 1px solid var(--hairline); font-variant-numeric: tabular-nums; }
-table.tint td.l { text-align: left; font-weight: 600; white-space: nowrap; color: var(--ink); cursor: pointer; }
+table.tint td { height: 34px; padding: 0 4px; text-align: center; border-bottom: 1px solid var(--hairline); font-variant-numeric: tabular-nums; }
+table.tint td.l { text-align: left; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 6px; color: var(--ink); cursor: pointer; }
 table.tint td.l .dev { font-weight: 400; color: var(--muted); font-size: 11.5px; margin-left: 6px; }
 table.tint tr.focus td { font-weight: 700; color: var(--ink); }
 table.tint tr.focus td.l { color: var(--accent-ink); box-shadow: inset 3px 0 0 var(--accent); }
@@ -491,6 +494,7 @@ pre.bibtex {
 
 /* ---------- mobile ---------- */
 @media (max-width: 640px) {
+  table.tint col.cname { width: 118px; }
   .wrap { padding: 0 16px; }
   header.site .wrap { gap: 6px; }
   .brand .bt { display: none; }
