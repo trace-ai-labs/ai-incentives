@@ -606,7 +606,7 @@ function vendorOpts(delayed) {
     nodes.forEach((n, i) => { n.classList.toggle("now", i === k); n.classList.toggle("done", i < k); });
     if (!autoCont) rf.style.width = (span * k / (STEPS.length - 1)) + "%";
     $("#stepprev").disabled = k === 0;
-    $("#stepnext").textContent = k === STEPS.length - 1 ? "Start over" : "Next →";
+    $("#stepnext").innerHTML = k === STEPS.length - 1 ? "&#8634; Replay" : "Next &rarr;";
   }
   function stopAuto() {
     if (timer) { clearInterval(timer); timer = null; }

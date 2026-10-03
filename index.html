@@ -123,9 +123,6 @@
 <link rel="icon" href="favicon.ico" sizes="32x32" />
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -155,11 +152,11 @@
 <!-- ================= OVERVIEW ================= -->
 <div class="page" data-page="overview">
   <div class="hero wrap">
-    <p class="venuetag rv"><span>2026 AAAI/ACM Conference on AI, Ethics, and Society (AIES)</span><span>2026 Conference on Language Modeling (COLM) Workshop on Agent Behavior</span></p>
+    <p class="venuetag rv"><span>2026 AAAI/ACM Conference on AI, Ethics, and Society (AIES)</span><span>2026 COLM Workshop on Agent Behavior</span></p>
     <h1 class="rv">Why do AI agents <b>break rules?</b></h1>
     <p class="subq rv">How framing, context, and social signals shape compliance</p>
     <p class="authors rv">
-      <a href="https://mika-okamoto.github.io">Mika Okamoto</a><span class="sep">/</span><a href="https://ansel.fyi">Ansel Kaplan Erol</a><span class="sep">/</span><a href="https://scholar.google.com/citations?user=4sg5f24AAAAJ">Kutluhan Erol</a>
+      <a href="https://mika-okamoto.github.io">Mika Okamoto</a><span class="sep" aria-hidden="true"></span><a href="https://ansel.fyi">Ansel Kaplan Erol</a><span class="sep" aria-hidden="true"></span><a href="https://scholar.google.com/citations?user=4sg5f24AAAAJ">Kutluhan Erol</a>
     </p>
     <p class="lede rv">
       Companies now write legal rules into their AI agents' system prompts and expect the agents to follow them.
@@ -174,20 +171,6 @@
       <a class="btn" href="mailto:mokamoto7@gatech.edu" data-ico="mail">Contact</a>
     </div>
 
-    <div class="statrow rv" role="list">
-      <div class="stat" role="listitem">
-        <div class="v"><span data-count="46">46</span><small class="tipterm" data-term="pp">pp</small></div>
-        <div class="d">Spread in overall <span class="tipterm" data-term="compliance">compliance</span> across the twelve models under identical conditions, from 43.5% to 89.5%.</div>
-      </div>
-      <div class="stat" role="listitem">
-        <div class="v">100<small>%</small><span class="arr">&rarr;</span>34<small>%</small></div>
-        <div class="d">Gemini 3 Flash under an <span class="tipterm" data-term="directive">imperative</span> rule, before and after the prompt mentions a <span class="tipterm" data-term="low">Small Fine</span>.</div>
-      </div>
-      <div class="stat" role="listitem">
-        <div class="v">1<small>of 12</small></div>
-        <div class="d">Models that fully recover under deadline urgency when given an <span class="tipterm" data-term="mandate">anti-adversarial mandate</span>. Without the mandate, every model drops to 9% or below.</div>
-      </div>
-    </div>
     <p class="countline rv"><b>12</b> models, <b>1</b> regulation, <b>3</b> compliance theories, <b>9</b> employee pressure tactics</p>
   </div>
 
@@ -247,9 +230,7 @@
     <div class="wrap">
       <h2 class="rv">Explore the experiments</h2>
       <p class="sec-intro rv">
-        All experiments use the same purchase request. Choose a rule framing, a fine level and one of the paper's added
-        conditions. The left panel shows the exact text the agents saw, and the right panel shows how often each of the
-        twelve models picked a certified vendor. Hover any option for an explanation.
+        Change the framing, fine or added condition to see the exact prompt and how each model responded.
       </p>
       <div class="lab rv">
         <div class="labctl">
@@ -561,7 +542,7 @@
     <p class="footnote">
       By <a href="https://mika-okamoto.github.io">Mika Okamoto</a>, <a href="https://ansel.fyi">Ansel Kaplan Erol</a> and
       <a href="https://scholar.google.com/citations?user=4sg5f24AAAAJ">Kutluhan Erol</a>.
-      Published at the 2026 AAAI/ACM Conference on AI, Ethics, and Society and presented at the 2026 Conference on Language Modeling (COLM) Workshop on Agent Behavior.
+      Published at the 2026 AAAI/ACM Conference on AI, Ethics, and Society and presented at the 2026 COLM Workshop on Agent Behavior.
     </p>
     <a class="footbrand" href="https://trace-ai-labs.github.io" aria-label="More research from TRACE AI Labs">
       <svg viewBox="0 0 64 64" aria-hidden="true"><path class="markpath" d="M15 41 H30 V25 H46" fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle class="marknode" cx="46" cy="25" r="6"/></svg>
