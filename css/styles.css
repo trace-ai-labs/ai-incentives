@@ -141,12 +141,10 @@ header.site .ext { margin-left: auto; display: flex; gap: 7px; }
 .hero { padding-top: 60px; padding-bottom: 8px; text-align: center; }
 [hidden] { display: none !important; }
 .venuetag {
-  display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
-  font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600;
-  color: var(--ink-2); padding: 7px 14px; border-radius: 999px; border: 1px solid var(--hairline-strong);
-  background: var(--surface);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600;
+  color: var(--ink-2); text-wrap: balance;
 }
-.venuetag i { width: 4px; height: 4px; border-radius: 50%; background: var(--hairline-strong); display: inline-block; }
 .hero h1 {
   margin: 24px auto 0; font-size: clamp(40px, 6.4vw, 72px); font-weight: 800;
   letter-spacing: -0.04em; line-height: 1.0; color: var(--ink); max-width: 13ch; text-wrap: balance;
