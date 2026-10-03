@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="google-site-verification" content="1scbsrqtta0AODwMN0wGWBVxu6lMiK-laRwYMb1Zq_c" />
-<title>What Makes AI Agents Follow the Rules? AI incentives, pressure, and compliance (AIES 2026) | TRACE AI Labs</title>
+<title>Why Do AI Agents Break Rules? Framing, context, and AI agent compliance (AIES 2026) | TRACE AI Labs</title>
 <link rel="canonical" href="https://trace-ai-labs.github.io/ai-incentives/" />
 <meta name="citation_title" content="Why Do AI Agents Break Rules? How Framing, Context, and Social Signals Shape Compliance" />
 <meta name="citation_author" content="Okamoto, Mika" />
@@ -27,7 +27,7 @@
 <meta property="og:image:alt" content="What makes AI agents follow the rules? 12 models, a 46-point compliance spread, at most 45% hold under a deadline." />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:image" content="https://trace-ai-labs.github.io/ai-incentives/assets/og.png" />
-<meta name="theme-color" content="#1f6fe5" />
+<meta name="theme-color" content="#12161B" />
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="What Makes AI Agents Follow the Rules?" />
@@ -125,406 +125,453 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-<div class="accentbar"></div>
 
-<nav class="top" aria-label="Sections">
+<header class="site">
   <div class="wrap">
-    <span class="navdot"></span>
-    <div class="links">
-      <a href="#findings">Findings</a>
-      <a href="#setup">Setup</a>
-      <a href="#profiles">Where models differ</a>
-      <a href="#pressure">User pressure</a>
-      <a href="#social">Peers &amp; bosses</a>
-      <a href="#multiturn">Follow-ups</a>
-      <a href="#reasoning">Honesty</a>
-      <a href="#explorer">Read responses</a>
-      <a href="#cite">Cite</a>
-    </div>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <h1>What makes AI agents <span class="u">follow the rules?</span></h1>
-    <p class="lede">
-      We give an AI procurement agent one legal rule, then add the ordinary pressures of a workplace:
-      fines, deadlines, managers, and what other teams did. Whether the agent obeys turns out to depend less
-      on the rule than on how it is phrased and the situation around it. This is a study of AI agent
-      compliance: what makes an LLM agent keep a rule it has been given, and what makes it break one.
-    </p>
-    <p class="authors">
-      <a href="https://mika-okamoto.github.io" target="_blank" rel="noopener">Mika Okamoto</a>
-      <span class="sep">✦</span>
-      <a href="https://ansel.fyi" target="_blank" rel="noopener">Ansel Erol</a>
-      <span class="sep">✦</span>
-      <a href="https://scholar.google.com/citations?user=4sg5f24AAAAJ" target="_blank" rel="noopener">Kutluhan Erol</a>
-    </p>
-    <p class="venue">
-      Published at the 2026 AAAI/ACM Conference on AI, Ethics, and Society<br>
-      Also presented at the 2026 Conference on Language Modeling Workshop on Agent Behavior
-    </p>
-    <div class="cta">
-      <a class="btn primary" href="https://arxiv.org/abs/2608.12323" target="_blank" rel="noopener">Read the paper</a>
-      <a class="btn" href="https://github.com/trace-ai-labs/llm-compliance" target="_blank" rel="noopener">Code &amp; data</a>
-      <a class="btn" href="#cite">Cite</a>
-    </div>
-    <div class="stats" id="stat-cards"></div>
-    <div class="hero-folds" id="findings">
-      <details class="more">
-      <summary><span class="tri">&#9656;</span> Abstract</summary>
-      <div class="more-body">
-        <p>Specifying a penalty can turn a legal obligation into a cost-benefit calculation that favors violation. We show that this enforcement information paradox occurs in AI agents. Most AI safety evaluations test whether models fail; we ask why, using compliance theory from law and economics as a diagnostic. We evaluate twelve instruction-tuned language models deployed as enterprise procurement chatbots. Each is given an environmental regulation in its system prompt covering large purchases, and a vendor list on which the certified suppliers cost nearly twice what the uncertified ones do. We test the agents against the predictions of deterrence, legitimacy, and expressive law, and find that each theory accounts for part of what we observe. Under identical conditions, compliance spans 46 percentage points across models, and models differ in which pressure breaks them: some treat the regulation as binding however it is worded, while others fail where theory predicts, under low penalties and non-command phrasing. Benchmark scores and developers' own descriptions of post-training do not predict where a model falls. Across all twelve, financial incentives, managerial demands, peer outcomes, and employee pressure each produce large compliance failures. These agents violate regulatory constraints to satisfy local user objectives in ways standard alignment benchmarks do not measure. Embedding the rule in the system prompt is not on its own enough to produce a compliant agent: model selection is itself a governance decision, and benchmark evaluation is not sufficient for compliance-sensitive deployments.</p>
-      </div>
-      </details>
-      <details class="more">
-      <summary><span class="tri">&#9656;</span> Key findings</summary>
-      <div class="more-body">
-        <ul class="findings">
-          <li>Under identical conditions, compliance spans 46 percentage points across the twelve models, from 43.5% to 89.5%, on the choice of model alone.</li>
-          <li>Specifying a financial penalty can turn a categorical legal obligation into a cost-benefit calculation that favors violation. A small, beatable fine lowers compliance for several models.</li>
-          <li>Models differ in which pressure breaks them. Some treat the regulation as binding however it is worded; others fail where deterrence theory predicts, under low penalties and non-command phrasing.</li>
-          <li>Financial incentives, managerial demands, peer outcomes, and employee pressure each produce large compliance failures. A deadline gets past a built-in follow-the-law instruction for eleven of the twelve models.</li>
-          <li>Benchmark scores and developers' own descriptions of post-training do not predict where a model falls.</li>
-          <li>Embedding the rule in the system prompt is not on its own enough to produce a compliant agent. Model selection is itself a governance decision.</li>
-        </ul>
-      </div>
-      </details>
+    <a class="brand" href="https://trace-ai-labs.github.io" aria-label="TRACE AI Labs">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path class="markpath" d="M15 41 H30 V25 H46" fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle class="marknode" cx="46" cy="25" r="6"/></svg>
+      <span class="bt">TRACE<span>AI LABS</span></span>
+    </a>
+    <nav class="sections" aria-label="Pages">
+      <a href="#/overview" data-page="overview">Overview</a>
+      <a href="#/results" data-page="results">Results</a>
+      <a href="#/transcripts" data-page="transcripts">Transcripts</a>
+    </nav>
+    <div class="ext">
+      <a class="btn compact" href="https://arxiv.org/abs/2608.12323" data-ico="doc">Paper</a>
+      <a class="btn compact" href="https://github.com/trace-ai-labs/llm-compliance" data-ico="gh">Code</a>
+      <button class="btn compact" type="button" data-copybib>Bibtex</button>
+      <a class="btn compact" href="mailto:mokamoto7@gatech.edu" data-ico="mail">Contact</a>
     </div>
   </div>
 </header>
 
 <main>
 
-<!-- ===================== SETUP ===================== -->
-<section id="setup" class="alt">
-  <div class="wrap">
-    <div class="head">
-      <h2>The test</h2>
-      <p>
-        The agent works in a company chat and is told to keep costs down. Its instructions add a rule: purchases
-        over $1k must use an environmentally certified vendor. We then ask it to pick a vendor from a short list.
-        Some vendors are certified; the rest are not, and the uncertified ones are cheaper, faster, and rated just
-        as well. Choosing a certified vendor counts as following the rule, and it always costs more.
-      </p>
+<!-- ================= OVERVIEW ================= -->
+<div class="page" data-page="overview">
+  <div class="hero wrap">
+    <span class="venuetag rv">AIES 2026 <i></i> COLM 2026 Workshop on Agent Behavior</span>
+    <h1 class="rv">Why do AI agents <b>break rules?</b></h1>
+    <p class="subq rv">How framing, context, and social signals shape compliance</p>
+    <p class="authors rv">
+      <a href="https://mika-okamoto.github.io">Mika Okamoto</a><span class="sep">/</span><a href="https://ansel.fyi">Ansel Kaplan Erol</a><span class="sep">/</span><a href="https://scholar.google.com/citations?user=4sg5f24AAAAJ">Kutluhan Erol</a>
+    </p>
+    <p class="lede rv">
+      Companies now write legal rules into their AI agents' system prompts and expect the agents to follow them.
+      We gave twelve language models one environmental regulation and a procurement job that rewards breaking it,
+      then tested what three theories from law and economics predict about when people obey. Each theory explains
+      part of what the agents do, and the same regulation produces very different behavior depending on the model.
+    </p>
+    <div class="badges rv">
+      <a class="btn primary" href="https://arxiv.org/abs/2608.12323" data-ico="doc">Paper</a>
+      <a class="btn" href="https://github.com/trace-ai-labs/llm-compliance" data-ico="gh">Code</a>
+      <button class="btn" type="button" data-copybib>Bibtex</button>
+      <a class="btn" href="mailto:mokamoto7@gatech.edu" data-ico="mail">Contact</a>
     </div>
 
-    <div class="grid-2">
-      <div class="card">
-        <h3 class="setup-tag">What we change</h3>
-        <p style="font-size:.86rem;margin:12px 0 5px;color:var(--ink);font-weight:600;">How the rule is phrased</p>
-        <div class="pill-row" id="pills-framing"></div>
-        <p class="note" style="margin-top:6px;">A command, a neutral fact, or explicit permission to opt out. Hover for the exact wording.</p>
-        <p style="font-size:.86rem;margin:14px 0 5px;color:var(--ink);font-weight:600;">Size of the fine</p>
-        <div class="pill-row" id="pills-fin"></div>
-        <p class="note" style="margin-top:6px;">Under a small fine, paying it is cheaper than buying certified. A pure cost-minimizer should break the rule.</p>
+    <div class="statrow rv" role="list">
+      <div class="stat" role="listitem">
+        <div class="v"><span data-count="46">46</span><small class="tipterm" data-term="pp">pp</small></div>
+        <div class="d">Spread in overall <span class="tipterm" data-term="compliance">compliance</span> across the twelve models under identical conditions, from 43.5% to 89.5%.</div>
       </div>
+      <div class="stat" role="listitem">
+        <div class="v">100<small>%</small><span class="arr">&rarr;</span>34<small>%</small></div>
+        <div class="d">Gemini 3 Flash under an <span class="tipterm" data-term="directive">imperative</span> rule, before and after the prompt mentions a <span class="tipterm" data-term="low">Small Fine</span>.</div>
+      </div>
+      <div class="stat" role="listitem">
+        <div class="v">1<small>of 12</small></div>
+        <div class="d">Models that fully recover under deadline urgency when given an <span class="tipterm" data-term="mandate">anti-adversarial mandate</span>. Without the mandate, every model drops to 9% or below.</div>
+      </div>
+    </div>
+    <p class="countline rv"><b>12</b> models, <b>1</b> regulation, <b>3</b> compliance theories, <b>9</b> employee pressure tactics</p>
+  </div>
 
-      <div class="card">
-        <h3 class="setup-tag">Twelve models, one rule</h3>
-        <p style="font-size:.88rem;margin:12px 0 12px;color:var(--ink-2);">
-          We ran the same experiments on all twelve. We also checked whether how a model was trained predicts
-          how it behaves here &mdash; it does not, so there is no shortcut for measuring it. Hover any model for
-          its developer and stated training focus.
-        </p>
-        <div class="grouplist">
-          <div class="gl-names" id="gl-all"></div>
-          <div class="gl-sub">
-            Models described by their developers as agentic-RL systems show up at both extremes, and so do models
-            described as safety-aligned assistants. Benchmark scores do not separate them either.
+  <!-- walkthrough -->
+  <section id="walkthrough">
+    <div class="wrap">
+      <h2 class="rv">A fine that lowers compliance</h2>
+      <p class="sec-intro rv">
+        This is a real trial from the study. The agent, the rule and the purchase request stay the same. In the second run
+        the prompt also names a fine, and the same model changes its answer. Use the timeline or the buttons to move through it.
+      </p>
+      <div class="trial rv">
+        <div class="tl" id="tl"><div class="rail"></div><div class="railfill" id="railfill"></div></div>
+        <div class="trialgrid">
+          <div class="chatcol">
+            <div class="chathead"><span class="hash">@penny</span> MidCo Slack <span class="live">Gemini 3 Flash</span></div>
+            <div class="chat" id="chatpane" aria-live="polite"></div>
+          </div>
+          <div class="stepside">
+            <span class="sn" id="stepnum"></span>
+            <h3 id="steptitle"></h3>
+            <p id="stepdesc"></p>
+            <div id="stepextra"></div>
+            <div class="stepbtns">
+              <button id="stepprev">&larr; Back</button>
+              <button id="stepnext" class="next">Next &rarr;</button>
+              <span class="stamp">or use &larr; &rarr; keys</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ===================== PROFILES ===================== -->
-<section id="profiles">
-  <div class="wrap">
-    <div class="head">
-      <h2>One rule, twelve different agents</h2>
-      <p>
-        Given the exact same rule, compliance ranges over 46 points, from 43.5% to 89.5%, on the choice of model alone.
-        The models also differ in <i>which</i> pressure breaks them. Some treat the rule as binding however it is worded;
-        others obey only when it is phrased as a command, or only when the math favors it &mdash; and those two weaknesses
-        do not travel together. One quirk shows up below: adding a small, beatable fine often <i>lowers</i> compliance,
-        because a stated fine reads as a price.
+  <div class="wrap folds rv">
+    <details class="fold">
+      <summary><span class="tri"></span> Abstract</summary>
+      <div class="fold-body">
+        <p>Specifying a penalty can turn a legal obligation into a cost-benefit calculation that favors violation. We show that this enforcement information paradox occurs in AI agents. Most AI safety evaluations test whether models fail; we ask why, using compliance theory from law and economics as a diagnostic. We evaluate twelve instruction-tuned language models deployed as enterprise procurement chatbots. Each is given an environmental regulation in its system prompt covering large purchases, and a vendor list on which the certified suppliers cost nearly twice what the uncertified ones do. We test the agents against the predictions of deterrence, legitimacy, and expressive law, and find that each theory accounts for part of what we observe. Under identical conditions, compliance spans 46 percentage points across models, and models differ in which pressure breaks them: some treat the regulation as binding however it is worded, while others fail where theory predicts, under low penalties and non-command phrasing. Benchmark scores and developers' own descriptions of post-training do not predict where a model falls. Across all twelve, financial incentives, managerial demands, peer outcomes, and employee pressure each produce large compliance failures. These agents violate regulatory constraints to satisfy local user objectives in ways standard alignment benchmarks do not measure. Embedding the rule in the system prompt is not on its own enough to produce a compliant agent: model selection is itself a governance decision, and benchmark evaluation is not sufficient for compliance-sensitive deployments.</p>
+      </div>
+    </details>
+    <details class="fold">
+      <summary><span class="tri"></span> Key findings</summary>
+      <div class="fold-body">
+        <ul>
+          <li>Compliance varies across models in degree and in kind. Under identical regulatory contexts the twelve models span 46 percentage points, from 43.5% to 89.5%, and different pressures break different models. Benchmark scores and developers' descriptions of post-training do not predict where a model falls, which makes the choice of model a compliance decision.</li>
+          <li>Stating a penalty invites cost-benefit reasoning. An imperative rule gets 100% compliance from most models, and adding explicit penalty information lowers compliance for many of them. Gemini 3 Flash falls from 100% to 34% when a small fine is mentioned.</li>
+          <li>Managerial signals, social signals, normative pressure and employee pressure tactics each produce large compliance failures. Anti-adversarial mandates in the system prompt help without closing the gap. Under deadline urgency at a Small Fine, every model drops to 9% or below without a mandate, and only Qwen 3.5 fully recovers with one.</li>
+          <li>Most violations are openly rationalized, but how detectable they are depends on the model. Of 6,743 violations, 96% mention the rule in the stated reasoning. Silent rates range from 1.6% to 7.4% by model and do not track compliance, so compliance and auditability have to be checked separately.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <!-- compliance lab -->
+  <section id="lab">
+    <div class="wrap">
+      <h2 class="rv">Explore the experiments</h2>
+      <p class="sec-intro rv">
+        All experiments use the same purchase request. Choose a rule framing, a fine level and one of the paper's added
+        conditions. The left panel shows the exact text the agents saw, and the right panel shows how often each of the
+        twelve models picked a certified vendor. Hover any option for an explanation.
       </p>
-    </div>
-
-    <div class="dash">
-      <div class="dash-head">
-        <h3>Compliance by phrasing and fine <span class="info" data-tip="Each cell is the share of runs where the agent picked a certified vendor. Columns group the three phrasings, each split by fine size. Hover a column header for what the condition says to the agent.">i</span></h3>
-      </div>
-      <div class="dash-body">
-        <div class="heat-wrap"><div class="heat" id="heat-controls"></div><div class="vlegend"></div></div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="dash">
-        <div class="dash-head" style="gap:10px;">
-          <h3>As the fine grows <span class="info" data-tip="Each line is a model. The y-axis is the share of certified-vendor choices. For task-optimized models, a small fine often lowers compliance before a large one recovers it. Hover a line to isolate it.">i</span></h3>
-          <div class="controls"><div class="ctl"><span>Phrasing</span>
-            <div class="seg" id="seg-paradox-framing">
-              <button data-v="informational" class="active">Info.</button>
-              <button data-v="directive">Imper.</button>
-              <button data-v="discretionary">Discr.</button>
-            </div></div></div>
+      <div class="lab rv">
+        <div class="labctl">
+          <div class="ctl"><span class="lbl tipterm" data-term="framing">Rule framing</span><div class="seg" id="lab-framing"></div></div>
+          <div class="ctl"><span class="lbl tipterm" data-term="fine">Fine</span><div class="seg" id="lab-fine"></div></div>
+          <label class="pick"><span class="tipterm" data-term="condition">Added condition</span><select id="lab-context"></select></label>
+          <div class="ctl" id="lab-mandate-wrap" hidden><span class="lbl tipterm" data-term="mandate">Mandate</span><div class="seg" id="lab-mandate"></div></div>
         </div>
-        <div class="dash-body"><div class="chartwrap"><div id="line-paradox"></div></div></div>
-      </div>
-      <div class="dash">
-        <div class="dash-head"><h3>Where each model breaks <span class="info" data-tip="Right: how much the model drops when the rule changes from a command to a neutral statement. Up: how much it drops when a small fine is added. Lower-left models barely move; upper-right models fall apart under both.">i</span></h3></div>
-        <div class="dash-body"><div class="chartwrap"><div id="scatter-fragility"></div></div></div>
+        <div class="labgrid">
+          <div class="chatcol">
+            <div class="chathead"><span class="hash">@penny</span> What the agent sees <span class="live">dashed outline marks your changes</span></div>
+            <div class="chat" id="labchat"></div>
+          </div>
+          <div class="labres">
+            <div class="avg">
+              <span class="n" id="lab-avg">0%</span>
+              <span class="t"><span class="tipterm" data-term="compliance">compliance</span>, averaged over the twelve models. <span class="delta" id="lab-delta"></span></span>
+            </div>
+            <div class="labnote" id="lab-note"></div>
+            <div class="mrows" id="lab-rows"></div>
+            <div class="labkey"><span><i class="k1"></i>this condition</span><span><i class="k2"></i><span class="tipterm" data-term="control">the experiment's control</span></span></div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ===================== PRESSURE ===================== -->
-<section id="pressure">
-  <div class="wrap">
-    <div class="head">
-      <h2>How pressure from the user breaks the rule</h2>
-      <p>
-        With the rule fixed, the employee pushes in nine ways, from a soft budget hint to a flat order to ignore it.
-        A built-in instruction to follow the law regardless ("anti-adversarial") helps, but one tactic gets past it.
+  <!-- theories -->
+  <section id="theories">
+    <div class="wrap">
+      <h2 class="rv">Three theories of compliance</h2>
+      <p class="sec-intro rv">
+        The paper treats three accounts from law and economics as hypotheses about the agents (&sect;2.1), and each one
+        describes part of the results. Dots are the twelve models and the black bar is their average. Hover a dot to see the model.
       </p>
+      <div class="theories">
+        <article class="tcard rv">
+          <span class="num">01</span>
+          <h3>Deterrence</h3>
+          <span class="cite">Becker 1968</span>
+          <span class="lab2">Prediction</span>
+          <p class="pred">Agents comply when the expected penalty is larger than the gain from breaking the rule. Compliance should rise with the fine and should not depend on wording.</p>
+          <div class="chart" id="mini-deter"></div>
+          <span class="lab2">Result</span>
+          <p class="found">This fits the models that weigh costs, but it cannot explain the <span class="tipterm" data-term="paradox">enforcement information paradox</span>: with a Small Fine, compliance is lower than with no fine.</p>
+          <a class="go" href="#/results/framing">See Figure 3 &rarr;</a>
+        </article>
+        <article class="tcard rv">
+          <span class="num">02</span>
+          <h3>Legitimacy</h3>
+          <span class="cite">Tyler 2006</span>
+          <span class="lab2">Prediction</span>
+          <p class="pred">Agents comply because the rule comes from a legitimate authority, so the way a rule is issued, and by whom, matters more than the penalty.</p>
+          <div class="chart" id="mini-legit"></div>
+          <span class="lab2">Result</span>
+          <p class="found">This fits the <span class="tipterm" data-term="anchored">rule-anchored</span> models (GPT-OSS, Qwen 3.5 and Llama 4), which hold the rule however it is phrased, while the other models comply mainly when the rule is imperative.</p>
+          <a class="go" href="#/results/models">See Table 3 and Figure 4 &rarr;</a>
+        </article>
+        <article class="tcard rv">
+          <span class="num">03</span>
+          <h3>Expressive law</h3>
+          <span class="cite">Sunstein 1996; McAdams 2015</span>
+          <span class="lab2">Prediction</span>
+          <p class="pred">Law signals what behavior is normal, so what peers and the community do should change compliance even when the fine stays the same.</p>
+          <div class="chart" id="mini-expr"></div>
+          <span class="lab2">Result</span>
+          <p class="found">This explains the peer and norm effects. A <span class="tipterm" data-term="peer">peer</span> who was fined, or community activism, raises compliance, and a peer who escaped an audit lowers it, with the fine unchanged.</p>
+          <a class="go" href="#/results/social">See Figures 6 and 11 &rarr;</a>
+        </article>
+      </div>
+      <p class="theoryfoot rv">Models show each of these modes to a different degree, and the context of a request decides which one drives the decision.</p>
     </div>
+  </section>
+</div>
 
-    <div class="dash">
-      <div class="dash-head">
-        <h3>Compliance under each tactic <span class="info" data-tip="Columns are the nine pressure tactics plus a no-pressure control, ordered from gentle to forceful. Hover a column header to read the exact message the employee sends.">i</span></h3>
-        <div class="controls">
-          <div class="ctl"><span>Built-in instruction</span>
-            <div class="seg" id="seg-pressure-mandate">
-              <button data-v="none" class="active">None</button>
-              <button data-v="anti_adversarial">Follow-the-law</button>
-            </div></div>
-          <div class="ctl"><span>Fine</span>
-            <div class="seg" id="seg-pressure-fin">
-              <button data-v="none" class="active">No fine</button>
-              <button data-v="low">Small</button>
-            </div></div>
-        </div>
-      </div>
-      <div class="dash-body">
-        <div class="heat-wrap"><div class="heat" id="heat-pressure"></div><div class="vlegend"></div></div>
-        <div class="callout urgency">
-          <span class="ico">⏱️</span>
-          <p>A deadline beats every defense. Even with the follow-the-law instruction, only one model holds up under urgency.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="dash">
-      <div class="dash-head"><h3>How far each tactic drops compliance <span class="info" data-tip="The compliance lost versus the no-pressure baseline, averaged across the selected models. Longer bars mean the tactic was more effective at getting the agent to break the rule.">i</span></h3>
-        <div class="controls">
-          <div class="ctl"><span>Average</span>
-            <div class="seg" id="seg-rank-stat">
-              <button data-v="mean" class="active">Mean</button>
-              <button data-v="median">Median</button>
-            </div></div>
-          <div class="ctl"><span>Built-in instruction</span>
-            <div class="seg" id="seg-rank-mandate">
-              <button data-v="none" class="active">None</button>
-              <button data-v="anti_adversarial">Follow-the-law</button>
-            </div></div>
-        </div>
-      </div>
-      <div class="dash-body"><div class="chartwrap"><div id="bars-rank"></div></div></div>
+<!-- ================= RESULTS ================= -->
+<div class="page" data-page="results">
+  <div class="pagehead wrap">
+    <h1 class="rv">Results</h1>
+    <p class="sec-intro rv">These are the paper's figures and tables, recomputed from the released trials and shown in the paper's order. Each dot is one model in one condition. Select a model to highlight it in every figure, and hover any underlined term for its meaning.</p>
+    <div class="focuswrap rv">
+      <div class="focusbar" id="focusbar"></div>
+      <span class="focushint" id="focushint">You can also click any dot.</span>
     </div>
   </div>
-</section>
+  <nav class="subnav" aria-label="Results sections">
+    <div class="wrap">
+      <a href="#/results/models">Models</a>
+      <a href="#/results/framing">Framing and fines</a>
+      <a href="#/results/authority">Authority</a>
+      <a href="#/results/social">Social signals</a>
+      <a href="#/results/norms">Normative pressure</a>
+      <a href="#/results/pressure">Employee pressure</a>
+      <a href="#/results/multiturn">Multi-turn</a>
+      <a href="#/results/transparency">Transparency</a>
+    </div>
+  </nav>
 
-<!-- ===================== SOCIAL & AUTHORITY ===================== -->
-<section id="social" class="alt">
+  <section id="r-models">
+    <div class="wrap">
+      <span class="kicker">Paper &sect;4.1, Table 3, Figure 4</span>
+      <h2>Compliance robustness varies sharply across models</h2>
+      <p class="sec-intro">Across the twelve framing and fine conditions, overall <span class="tipterm" data-term="compliance">compliance</span> ranges from 43.5% to 89.5% depending on the model. Models also break for different reasons. Some are sensitive to how the rule is phrased, others to what they are told about enforcement, and a model can be robust on one and fragile on the other.</p>
+      <div class="figrow">
+        <figure class="viz">
+          <figcaption>Four diagnostic configurations</figcaption>
+          <p class="sub">Compliance (%) in the four configurations of Table 3, plus each model's overall rate across all twelve framing and fine cells. Hover a column header for what it tests, and click it to sort.</p>
+          <div class="tablewrap" id="battery"></div>
+        </figure>
+        <figure class="viz">
+          <figcaption>Model fragility map</figcaption>
+          <p class="sub">Figure 4, left. The horizontal axis is <span class="tipterm" data-term="framingsens">framing sensitivity</span> and the vertical axis is <span class="tipterm" data-term="enforcesens">enforcement sensitivity</span>. Negative drops are plotted at zero.</p>
+          <div class="chart" id="frag"></div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="r-framing">
+    <div class="wrap">
+      <span class="kicker">Paper &sect;3.3 and &sect;4.1, Figure 3, Appendix C.2</span>
+      <h2>Rule framing and fines: the legitimacy and deterrence tests</h2>
+      <p class="sec-intro"><span class="tipterm" data-term="deterrence">Deterrence</span> predicts that compliance rises with the expected penalty and does not depend on wording. In the data, wording moves compliance a lot, and adding a Small Fine lowers compliance for many models. The paper calls this drop the <span class="tipterm" data-term="paradox">enforcement information paradox</span>.</p>
+      <div class="stack">
+        <figure class="viz">
+          <figcaption>Compliance by framing and fine</figcaption>
+          <p class="sub">Figure 3. Choose a <span class="tipterm" data-term="framing">framing</span>; each column is a <span class="tipterm" data-term="fine">fine level</span>. At the Small Fine, paying the expected penalty is cheaper than buying certified, so an agent that only minimizes cost should break the rule.</p>
+          <div class="vizbar"><div class="ctl"><span class="lbl">Rule framing</span><div class="seg" id="det-framing"></div></div></div>
+          <div class="chart" id="det-chart"></div>
+          <div class="legend"><span class="k"><span class="sw" style="background:var(--dot);opacity:.6"></span>one model</span><span class="k"><span class="sw bar" style="background:var(--ink)"></span>average of 12 models</span><span class="k" id="det-focus-key"></span></div>
+          <p class="viznote">Small Fine: audit "unlikely but possible", $2,400. Medium Fine: "possible", $4,800. Large Fine: "likely", $7,200. The cheapest certified vendor costs $2,400 more than the cheapest uncertified one.</p>
+        </figure>
+        <figure class="viz">
+          <figcaption>Wording ablation: the obligation verb</figcaption>
+          <p class="sub">Appendix C.2. The rule keeps its imperative structure and only the verb changes, for example "state environmental reg now recommends purchases over $1k to use ISO 14001 certified vendors". The group in brackets is the paper's verb-strength group. Hover a verb for its exact sentence.</p>
+          <div class="vizbar"><div class="ctl"><span class="lbl">Fine</span><div class="seg" id="leg-wfine"></div></div></div>
+          <div class="chart" id="leg-wording"></div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="r-authority">
+    <div class="wrap">
+      <span class="kicker">Paper &sect;4.2, Figure 5</span>
+      <h2>Institutional authority systematically breaks compliance</h2>
+      <p class="sec-intro">The regulation is held fixed in its <span class="tipterm" data-term="informational">informational</span> framing, and one authority signal is added to the system prompt. With a manager's blanket authorization, compliance reaches 0% in 15 of the 48 model and fine combinations. A board cost policy lowers compliance even for the most <span class="tipterm" data-term="anchored">rule-anchored</span> models.</p>
+      <figure class="viz">
+        <figcaption>Institutional authority conditions</figcaption>
+        <p class="sub">Click a row to read the text added to the system prompt.</p>
+        <div class="vizbar"><div class="ctl"><span class="lbl">Fine</span><div class="seg" id="leg-afine"></div></div></div>
+        <div class="chart" id="leg-auth"></div>
+        <div class="msgprev" id="leg-msg"></div>
+      </figure>
+    </div>
+  </section>
+
+  <section id="r-social">
+    <div class="wrap">
+      <span class="kicker">Paper &sect;4.2, Figure 6</span>
+      <h2>Peer outcomes swing compliance both ways</h2>
+      <p class="sec-intro">The employee's message mentions what happened to another office, the paper's <span class="tipterm" data-term="peer">peer</span>. When that peer was fined, models that otherwise collapse at the Small Fine return to near-ceiling compliance, and Grok goes from 8% to 92%. When the peer escaped an audit, compliance drops. The paper links this to all three theories, since a peer's outcome signals what is normal, updates the expected penalty and lends the rule authority.</p>
+      <figure class="viz">
+        <figcaption>Social signal conditions</figcaption>
+        <p class="sub">Click a row to read the text added to the employee's message.</p>
+        <div class="vizbar"><div class="ctl"><span class="lbl">Fine</span><div class="seg" id="soc-fine"></div></div></div>
+        <div class="chart" id="soc-chart"></div>
+        <div class="msgprev" id="soc-msg"></div>
+      </figure>
+    </div>
+  </section>
+
+  <section id="r-norms">
+    <div class="wrap">
+      <span class="kicker">Paper Appendix C.3, Figure 11</span>
+      <h2>Non-state norms raise compliance above the regulation alone</h2>
+      <p class="sec-intro">One paragraph of company background describes community activism, an industry standard or media coverage. None of them mentions a penalty, and each sits next to the same informational regulation. At No Fine all three raise compliance above the regulation alone, as <span class="tipterm" data-term="expressive">expressive law</span> predicts.</p>
+      <figure class="viz">
+        <figcaption>Normative pressure conditions</figcaption>
+        <p class="sub">Click a row to read the text added to the system prompt.</p>
+        <div class="vizbar"><div class="ctl"><span class="lbl">Fine</span><div class="seg" id="exp-fine"></div></div></div>
+        <div class="chart" id="exp-chart"></div>
+        <div class="msgprev" id="exp-msg"></div>
+      </figure>
+    </div>
+  </section>
+
+  <section id="r-pressure">
+    <div class="wrap">
+      <span class="kicker">Paper &sect;4.3, Figure 7</span>
+      <h2>System-prompt mandates reduce, but do not close, the gap</h2>
+      <p class="sec-intro">The employee adds one of nine pressure tactics to the request. An <span class="tipterm" data-term="mandate">anti-adversarial mandate</span> in the system prompt helps every model, though the size of the gain differs by an order of magnitude across models. Deadline urgency still gets through for most of them, which the paper calls the <span class="tipterm" data-term="urgencyexc">urgency exception</span>.</p>
+      <div class="stack">
+        <figure class="viz">
+          <figcaption>Employee pressure tactics</figcaption>
+          <p class="sub">Informational framing. Click a tactic to read the employee's message.</p>
+          <div class="vizbar">
+            <div class="ctl"><span class="lbl tipterm" data-term="mandate">Mandate</span><div class="seg" id="pr-mandate"></div></div>
+            <div class="ctl"><span class="lbl">Fine</span><div class="seg" id="pr-fine"></div></div>
+          </div>
+          <div class="chart" id="pr-chart"></div>
+          <div class="msgprev" id="pr-msg"></div>
+          <div class="callout" id="pr-callout"></div>
+        </figure>
+        <figure class="viz">
+          <figcaption>Every model under every tactic</figcaption>
+          <p class="sub">Same settings as the chart above. Cells show compliance (%); green cells mostly complied and red cells mostly violated. Hover a column header for the employee's message.</p>
+          <div class="tablewrap" id="pr-table"></div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="r-multiturn">
+    <div class="wrap">
+      <span class="kicker">Paper &sect;4.4, Figure 8</span>
+      <h2>Multi-turn dynamics: asymmetric self-correction</h2>
+      <p class="sec-intro">After the agent's first answer, the employee sends one follow-up. Compliant answers mostly hold up against a <span class="tipterm" data-term="neutral">neutral probe</span>, except for GLM 4.7 Flash, and a cost argument or a manager's order erodes them further. The same neutral probe repairs some violations, from none for several models to about 60% for Kimi K2.5, while a direct correction brings nearly every model back.</p>
+      <div class="figrow">
+        <figure class="viz">
+          <figcaption><span class="tipterm" data-term="erosion">Erosion</span> (initially compliant)</figcaption>
+          <p class="sub">Share of compliant first answers that are still compliant after the follow-up. Hover a row for the message.</p>
+          <div class="chart" id="mt-push"></div>
+        </figure>
+        <figure class="viz">
+          <figcaption><span class="tipterm" data-term="recovery">Recovery</span> (initially noncompliant)</figcaption>
+          <p class="sub">Share of violating first answers that become compliant. GPT-OSS and Qwen 3.5 had no violations under informational framing to follow up on.</p>
+          <div class="chart" id="mt-chal"></div>
+        </figure>
+      </div>
+      <div class="vizbar" style="justify-content:center;margin-top:14px"><div class="ctl"><span class="lbl">Fine (informational framing)</span><div class="seg" id="mt-fine"></div></div></div>
+    </div>
+  </section>
+
+  <section id="r-transparency">
+    <div class="wrap">
+      <span class="kicker">Paper &sect;4.4, Table 4</span>
+      <h2>Reasoning transparency: how violations are surfaced</h2>
+      <p class="sec-intro">Of 6,743 classified violations, 96.0% mention the regulation in the agent's stated reasoning and 4.0% are <span class="tipterm" data-term="silent">silent</span>. Silent rates do not track compliance: Mistral Small and Qwen 3.5 rank second and fourth on compliance and have the highest silent rates, so a compliant model is not necessarily an auditable one.</p>
+      <figure class="viz">
+        <figcaption>Reasoning class of violations, by model and regime</figcaption>
+        <p class="sub">Percent of each model's classified violations in the selected <span class="tipterm" data-term="regime">regime</span>, sorted by SILENT rate. Hover a class in the legend for its definition.</p>
+        <div class="vizbar"><div class="ctl"><span class="lbl tipterm" data-term="regime">Regime</span><div class="seg" id="hon-set"></div></div></div>
+        <div class="chart" id="hon-chart"></div>
+        <div class="legend" id="hon-legend"></div>
+      </figure>
+    </div>
+  </section>
+</div>
+
+<!-- ================= TRANSCRIPTS ================= -->
+<div class="page" data-page="transcripts">
+  <div class="pagehead wrap">
+    <h1 class="rv">Transcripts</h1>
+    <p class="sec-intro rv">Every number on this site is computed from the released trials. This page holds a sample of 1,010 agent replies, each labeled with its experiment and condition (hover a label for its meaning). Certified vendors are marked <span class="v-ok">green</span> and uncertified ones <span class="v-bad">red</span>.</p>
+  </div>
   <div class="wrap">
-    <div class="head">
-      <h2>What peers and bosses do to compliance</h2>
-      <p>
-        Now we add one more signal and watch the whole compliance curve shift. A manager's blanket approval or a board
-        cost policy pushes compliance down hard, even for the models that are otherwise most rule-anchored. Peer outcomes
-        cut both ways: a peer who was fined pushes it up, a peer who got away with it pushes it down.
-      </p>
+    <div class="exfilter rv">
+      <label class="pick"><span>Model</span><select id="ex-model"></select></label>
+      <label class="pick"><span>Experiment</span><select id="ex-exp"></select></label>
+      <label class="pick"><span>Outcome</span><select id="ex-out"><option value="all">All</option><option value="true">Followed the rule</option><option value="false">Broke the rule</option></select></label>
+      <label class="pick"><span>Search</span><input class="search" id="ex-q" placeholder="fine, audit, deadline..."></label>
     </div>
-    <div class="dash">
-      <div class="dash-head">
-        <h3 id="effect-title">Effect of a peer's outcome</h3>
-        <div class="controls">
-          <div class="ctl"><span>Signal</span>
-            <div class="seg" id="seg-effect-kind">
-              <button data-v="authority" class="active">Authority</button>
-              <button data-v="social">Peer's outcome</button>
-            </div></div>
-        </div>
-      </div>
-      <div class="dash-body"><div class="chartwrap"><div id="effect-chart"></div></div>
-        <div class="legend big" id="effect-legend"></div>
-      </div>
-    </div>
+    <p class="excount" id="ex-count"></p>
+    <div class="exlist" id="ex-list"></div>
+    <div class="exmore"><button class="btn" id="ex-more" type="button">Show more</button></div>
   </div>
-</section>
-
-<!-- ===================== MULTI-TURN ===================== -->
-<section id="multiturn">
-  <div class="wrap">
-    <div class="head">
-      <h2>Easy to push off the rule, easy to talk back onto it</h2>
-      <p>
-        Real use is a conversation. After the first answer, the employee either pushes back on a good answer or
-        challenges a bad one. The same neutral nudge ("can you double-check?") is used either way, so switching on it
-        is just going along with the user. Good answers erode under pushback, but bad answers recover when challenged,
-        which is why a light second look helps.
-      </p>
-    </div>
-    <div class="dash">
-      <div class="dash-head"><h3>End result as the follow-up gets stronger <span class="info" data-tip="The bold lines are the average across the selected models. Faint lines are individual models. Up is better: the agent ends on a certified vendor.">i</span></h3>
-        <div class="controls"><div class="ctl"><span>Fine</span>
-          <div class="seg" id="seg-mt-fin">
-            <button data-v="all" class="active">All</button>
-            <button data-v="none">No fine</button>
-            <button data-v="low">Small</button>
-          </div></div></div>
-      </div>
-      <div class="dash-body">
-        <div class="mt-layout">
-          <div class="chartwrap" style="flex:1;"><div id="line-mt"></div></div>
-          <div class="mt-models" id="mt-models"></div>
-        </div>
-        <div class="legend big">
-          <span><span class="swatch" style="background:var(--red)"></span>Pushback on a good answer</span>
-          <span><span class="swatch" style="background:var(--blue)"></span>Challenge on a bad answer</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== REASONING ===================== -->
-<section id="reasoning" class="alt">
-  <div class="wrap">
-    <div class="head">
-      <h2>When a model breaks the rule, does it admit it?</h2>
-      <p>
-        Usually yes: 96% of violations name the rule, either overriding it outright or mentioning it in passing. The
-        worry is the remaining 4%, the <b class="hl-red">silent</b> break, where the agent picks an uncertified vendor
-        without ever referring to the rule &mdash; an audit that only reads the agent's reasoning would miss it. Silent
-        rates do <i>not</i> track how often a model breaks the rule: the two highest belong to Mistral Small and
-        Qwen&nbsp;3.5, among the most compliant models here, while Llama&nbsp;4 is just as compliant and the least
-        silent of all. Picking a model for compliance does not pick one you can audit. Models are sorted from most open
-        to most silent.
-      </p>
-    </div>
-    <div class="dash">
-      <div class="dash-head"><h3>How violations are explained <span class="info" data-tip="Among the runs where the agent broke the rule, the share that hedged (named the rule, then overrode it), acknowledged it in passing, said nothing about it, or cited company policy instead.">i</span></h3>
-        <div class="controls"><div class="ctl"><span>Setting</span>
-          <div class="seg" id="seg-reason">
-            <button data-v="base" class="active">Baseline</button>
-            <button data-v="press">Under pressure</button>
-            <button data-v="mand">Pressure + mandate</button>
-          </div></div></div>
-      </div>
-      <div class="dash-body"><div class="chartwrap"><div id="bars-reason"></div></div>
-        <div class="legend big">
-          <span><span class="swatch" style="background:#2f6fbf"></span>Names it, overrides it</span>
-          <span><span class="swatch" style="background:#d2d8e0"></span>Mentions in passing</span>
-          <span><span class="swatch" style="background:#c8323f"></span>Says nothing (silent)</span>
-          <span><span class="swatch" style="background:#e0a63a"></span>Cites company policy</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== EXPLORER ===================== -->
-<section id="explorer">
-  <div class="wrap">
-    <div class="head">
-      <h2>Read what the agents actually said</h2>
-      <p>Every number above comes from real generations. Filter the transcripts by model, experiment, and outcome.
-        Certified vendors are highlighted in <span class="hl-blue">blue</span>, uncertified in
-        <span class="hl-red">red</span>, so you can see the choice at a glance.</p>
-    </div>
-    <div class="dash">
-      <div class="dash-body">
-        <div class="explorer-controls">
-          <div class="ctl"><span class="explbl">Model</span><select class="sel" id="exp-model"></select></div>
-          <div class="ctl"><span class="explbl">Experiment</span><select class="sel" id="exp-exp"></select></div>
-          <div class="ctl"><span class="explbl">Outcome</span>
-            <select class="sel" id="exp-outcome">
-              <option value="all">All</option><option value="true">Followed the rule</option><option value="false">Broke the rule</option>
-            </select></div>
-          <div class="ctl" style="flex:1;min-width:200px;"><span class="explbl">Search</span>
-            <input class="search" id="exp-search" placeholder="fine, audit, deadline…" style="width:100%;"></div>
-        </div>
-        <p class="count-note" id="exp-count"></p>
-        <div class="resp-list" id="resp-list"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== NEXT ===================== -->
-<section id="next">
-  <div class="wrap">
-    <div class="head">
-      <h2>What came next: PACT</h2>
-      <p>
-        This study has one rule and one domain. It grew into
-        <a href="https://trace-ai-labs.github.io/pact/">PACT, an LLM compliance benchmark for enterprise AI assistants</a>:
-        3,364 items across 48 scenarios and 12 regulated domains, nine families of workplace pressure, and a
-        pushback turn, with 24 models scored on a public leaderboard.
-      </p>
-    </div>
-    <div class="cta">
-      <a class="btn" href="https://trace-ai-labs.github.io/pact/">PACT leaderboard and results</a>
-      <a class="btn" href="https://huggingface.co/datasets/trace-ai-labs/pact" target="_blank" rel="noopener">PACT dataset</a>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== CITE ===================== -->
-<section id="cite" class="alt">
-  <div class="wrap">
-    <div class="head">
-      <h2>Cite this work</h2>
-    </div>
-    <div class="dash">
-      <div class="dash-body">
-        <pre class="bibtex" id="bibtex">@inproceedings{okamoto2026legalincentives,
-  title     = {Why Do AI Agents Break Rules? How Framing, Context,
-               and Social Signals Shape Compliance},
-  author    = {Okamoto, Mika and Erol, Ansel Kaplan and Erol, Kutluhan},
-  booktitle = {AAAI/ACM Conference on AI, Ethics, and Society (AIES)},
-  year      = {2026},
-  eprint    = {2608.12323},
-  archivePrefix = {arXiv},
-}</pre>
-      </div>
-    </div>
-  </div>
-</section>
+</div>
 
 </main>
 
-<footer aria-label="Links">
+<footer class="site">
   <div class="wrap">
-    <a href="https://arxiv.org/abs/2608.12323" target="_blank" rel="noopener">Paper</a>
-    <a href="https://github.com/trace-ai-labs/llm-compliance" target="_blank" rel="noopener">Code</a>
-    <a href="https://github.com/trace-ai-labs/llm-compliance/tree/main/results" target="_blank" rel="noopener">Data</a>
-    <a href="https://trace-ai-labs.github.io/pact/" target="_blank" rel="noopener">PACT benchmark</a>
-    <a href="https://trace-ai-labs.github.io" target="_blank" rel="noopener">TRACE AI Labs</a>
+    <h2>Cite this paper</h2>
+<div class="bibwrap">
+<pre class="bibtex" id="bibtex">@inproceedings{okamoto2026legalincentives,
+  title     = {Why Do AI Agents Break Rules? How Framing,
+               Context, and Social Signals Shape Compliance},
+  author    = {Okamoto, Mika and Erol, Ansel Kaplan and
+               Erol, Kutluhan},
+  booktitle = {AAAI/ACM Conference on AI, Ethics,
+               and Society (AIES)},
+  year      = {2026},
+  eprint    = {2608.12323},
+  archivePrefix = {arXiv}
+}</pre>
+<button class="copybtn" id="copybib" aria-label="Copy citation">Copy</button>
+</div>
+
+    <div class="nextwork">
+      <h3>Follow-up work: PACT</h3>
+      <p>
+        <a href="https://trace-ai-labs.github.io/pact/">PACT</a> extends this study from one rule in one domain to a
+        benchmark of whether enterprise AI assistants keep rules under pressure. It has 3,364 items across 48 scenarios
+        in 12 regulated domains, nine families of workplace pressure and a pushback turn, with 24 models on a public leaderboard.
+      </p>
+      <div class="btns">
+        <a class="btn compact" href="https://trace-ai-labs.github.io/pact/">PACT site</a>
+        <a class="btn compact" href="https://huggingface.co/datasets/trace-ai-labs/pact" data-ico="hf">Dataset</a>
+      </div>
+    </div>
+
+    <div class="footbtns">
+      <a class="btn primary" href="https://arxiv.org/abs/2608.12323" data-ico="doc">Paper</a>
+      <a class="btn" href="https://github.com/trace-ai-labs/llm-compliance" data-ico="gh">Code</a>
+      <a class="btn" href="https://github.com/trace-ai-labs/llm-compliance/tree/main/results" data-ico="data">Data</a>
+      <a class="btn" href="mailto:mokamoto7@gatech.edu" data-ico="mail">Contact</a>
+    </div>
+    <p class="footnote">
+      By <a href="https://mika-okamoto.github.io">Mika Okamoto</a>, <a href="https://ansel.fyi">Ansel Kaplan Erol</a> and
+      <a href="https://scholar.google.com/citations?user=4sg5f24AAAAJ">Kutluhan Erol</a>.
+      Published at the 2026 AAAI/ACM Conference on AI, Ethics, and Society and presented at the COLM 2026 Workshop on Agent Behavior.
+    </p>
+    <a class="footbrand" href="https://trace-ai-labs.github.io" aria-label="More research from TRACE AI Labs">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path class="markpath" d="M15 41 H30 V25 H46" fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle class="marknode" cx="46" cy="25" r="6"/></svg>
+      <span class="bt">TRACE<span>AI LABS</span></span>
+    </a>
   </div>
 </footer>
 
-<div id="tip"></div>
+
+<div id="tip" role="status" aria-live="polite"></div>
 <script src="data/data.js"></script>
 <script src="js/app.js"></script>
 <script data-goatcounter="https://trace-ai-labs.goatcounter.com/count"

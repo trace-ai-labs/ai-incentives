@@ -21,8 +21,8 @@ static page.
 
 ```
 index.html        # all page content + dashboard containers
-css/styles.css    # blue / agentic-safety theme, hand-rolled
-js/app.js         # all interactivity: heatmaps, SVG charts, response explorer
+css/styles.css    # TRACE brand colors, PACT-site layout, hand-rolled
+js/app.js         # walkthrough, compliance lab, SVG charts, transcript browser
 data/data.js      # precomputed aggregates + sampled transcripts (window.SITE_DATA)
 build_data.py     # regenerates data/data.js from the raw experiment JSONL
 ```
